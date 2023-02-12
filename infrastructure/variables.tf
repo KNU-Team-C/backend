@@ -4,7 +4,7 @@ variable "project" {
 }
 
 variable "credentials_file" {
-  default = file("credentials.json")
+  default = "credentials.json"
 }
 
 variable "region" {
