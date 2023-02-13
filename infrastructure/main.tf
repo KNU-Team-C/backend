@@ -44,7 +44,7 @@ resource "google_project_service" "run_api" {
 
 # Creates Google Cloud Run app
 resource "google_cloud_run_service" "backend_server" {
-  name     = "backend-server2"
+  name     = "backend-server-dev"
   location = var.region
   template {
     spec {
