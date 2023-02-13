@@ -41,6 +41,9 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Navigate to the infrastructure folder
+        run: cd infrastructure
+
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
       
