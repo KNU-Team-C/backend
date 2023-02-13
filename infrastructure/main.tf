@@ -4,6 +4,11 @@ terraform {
       source  = "hashicorp/google"
       version = "4.51.0"
     }
+
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "3.0.1"
+    }
   }
 }
 
@@ -12,6 +17,24 @@ provider "google" {
   project     = var.project
   region      = var.region
   zone        = var.zone
+}
+
+provider "docker" {
+  host = "npipe:////.//pipe//docker_engine"
+
+  registry_auth {
+    address  = "registry.hub.docker.com"
+  }
+}
+
+# Pulls the Docker image
+resource "docker_image" "backend_image" {
+  name          = data.docker_registry_image.backend_image.name
+  pull_triggers = [data.docker_registry_image.backend_image.sha256_digest]
+}
+
+data "docker_registry_image" "backend_image" {
+  name = "teamcknu/backend:latest"
 }
 
 # Enables the Cloud Run API
@@ -28,12 +51,7 @@ resource "google_cloud_run_service" "backend_app" {
   template {
     spec {
       containers {
-        image = "docker.io/teamcknu/project_backend"
-		startup_probe {
-          tcp_socket {
-            port = 5000
-          }
-        }
+        image = docker_image.backend_image.name
       }
     }
   }
@@ -42,8 +60,13 @@ resource "google_cloud_run_service" "backend_app" {
     percent         = 100
     latest_revision = true
   }
+
+  depends_on = [
+    google_project_service.run_api
+  ]
 }
 
+# Allow unauthenticated users to invoke the service
 data "google_iam_policy" "noauth" {
   binding {
     role = "roles/run.invoker"
@@ -53,7 +76,6 @@ data "google_iam_policy" "noauth" {
   }
 }
 
-# Allow unauthenticated users to invoke the service
 resource "google_cloud_run_service_iam_policy" "noauth" {
   location = google_cloud_run_service.backend_app.location
   project  = google_cloud_run_service.backend_app.project
