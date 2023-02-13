@@ -34,7 +34,7 @@ jobs:
           tags: ${{ secrets.DOCKER_USER }}/backend:latest
 
   build_cloud_infrastructure:
-    # needs: push_to_registry
+    needs: push_to_registry
     name: Build Google Cloud Infrastructure
     runs-on: ubuntu-latest
     defaults:
