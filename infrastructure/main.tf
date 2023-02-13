@@ -10,6 +10,11 @@ terraform {
       version = "3.0.1"
     }
   }
+
+  backend "gcs" {
+    bucket = "teamcknu-backend-bucket"
+    prefix = "terraform/state"
+  }
 }
 
 provider "google" {
@@ -21,6 +26,7 @@ provider "google" {
 
 provider "docker" {
   host = "unix:///var/run/docker.sock"
+  # host = "npipe:////.//pipe//docker_engine" # for Windows
 
   registry_auth {
     address = "registry.hub.docker.com"
@@ -44,7 +50,7 @@ resource "google_project_service" "run_api" {
 
 # Creates Google Cloud Run app
 resource "google_cloud_run_service" "backend_server" {
-  name     = "backend-server-dev"
+  name     = "backend-server-development"
   location = var.region
   template {
     spec {
