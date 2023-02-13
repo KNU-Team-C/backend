@@ -28,25 +28,23 @@ provider "docker" {
 }
 
 # Pulls the Docker image
+data "docker_registry_image" "backend_image" {
+  name = "teamcknu/backend:latest"
+}
+
 resource "docker_image" "backend_image" {
   name          = data.docker_registry_image.backend_image.name
   pull_triggers = [data.docker_registry_image.backend_image.sha256_digest]
 }
 
-data "docker_registry_image" "backend_image" {
-  name = "teamcknu/backend:latest"
-}
-
 # Enables the Cloud Run API
 resource "google_project_service" "run_api" {
   service = "run.googleapis.com"
-
-  disable_on_destroy = true
 }
 
 # Creates Google Cloud Run app
-resource "google_cloud_run_service" "backend_app" {
-  name     = "backend-app"
+resource "google_cloud_run_service" "backend_server" {
+  name     = "backend-server2"
   location = var.region
   template {
     spec {
@@ -62,7 +60,8 @@ resource "google_cloud_run_service" "backend_app" {
   }
 
   depends_on = [
-    google_project_service.run_api
+    google_project_service.run_api,
+    docker_image.backend_image
   ]
 }
 
@@ -77,13 +76,17 @@ data "google_iam_policy" "noauth" {
 }
 
 resource "google_cloud_run_service_iam_policy" "noauth" {
-  location = google_cloud_run_service.backend_app.location
-  project  = google_cloud_run_service.backend_app.project
-  service  = google_cloud_run_service.backend_app.name
+  location = google_cloud_run_service.backend_server.location
+  project  = google_cloud_run_service.backend_server.project
+  service  = google_cloud_run_service.backend_server.name
 
   policy_data = data.google_iam_policy.noauth.policy_data
+
+  depends_on = [
+    google_cloud_run_service.backend_server
+  ]
 }
 
 output "service_url" {
-  value = google_cloud_run_service.backend_app.status[0].url
+  value = google_cloud_run_service.backend_server.status[0].url
 }
