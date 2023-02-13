@@ -23,7 +23,7 @@ provider "docker" {
   host = "npipe:////.//pipe//docker_engine"
 
   registry_auth {
-    address  = "registry.hub.docker.com"
+    address = "registry.hub.docker.com"
   }
 }
 
@@ -33,7 +33,7 @@ data "docker_registry_image" "backend_image" {
 }
 
 resource "docker_image" "backend_image" {
-  name          = data.docker_registry_image.backend_image.name
+  name          = "${data.docker_registry_image.backend_image.name}@${data.docker_registry_image.backend_image.sha256_digest}"
   pull_triggers = [data.docker_registry_image.backend_image.sha256_digest]
 }
 
