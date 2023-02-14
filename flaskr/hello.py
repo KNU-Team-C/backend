@@ -10,4 +10,4 @@ def hello():
 
 @bp.route("/greeting", methods=["GET"])
 def hello2():
-    return "Hello! Have a nice day! Greetings from server"
+    return "Hello! Have a nice day! Greetings from server :)"
