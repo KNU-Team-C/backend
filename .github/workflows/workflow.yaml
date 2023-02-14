@@ -32,39 +32,39 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USER }}/backend:${{ env.IMAGE_TAG }}
 
-  # build_cloud_infrastructure:
-  #   needs: push_to_registry
-  #   name: Build Google Cloud Infrastructure
-  #   runs-on: ubuntu-latest
-  #   env: 
-  #     # TF_LOG: DEBUG
-  #     TF_VAR_docker_tag: $IMAGE_TAG
-  #   defaults:
-  #     run:
-  #       working-directory: ./infrastructure
-  #   steps:
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v3
+  build_cloud_infrastructure:
+    needs: push_to_registry
+    name: Build Google Cloud Infrastructure
+    runs-on: ubuntu-latest
+    env: 
+      # TF_LOG: DEBUG
+      TF_VAR_docker_tag: $IMAGE_TAG
+    defaults:
+      run:
+        working-directory: ./infrastructure
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
 
-  #     - name: Set up Terraform
-  #       uses: hashicorp/setup-terraform@v1
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
       
-  #     - name: Terraform init
-  #       run: terraform init
-  #       env:
-  #         GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      - name: Terraform init
+        run: terraform init
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
       
-  #     - name: Terraform format
-  #       run: terraform fmt -check
+      - name: Terraform format
+        run: terraform fmt -check
 
-  #     - name: Terraform plan
-  #       run: terraform plan
-  #       env:
-  #         GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      - name: Terraform plan
+        run: terraform plan
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
       
-  #     - name: Terraform apply
-  #       run: terraform apply -auto-approve
-  #       env:
-  #         GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      - name: Terraform apply
+        run: terraform apply -auto-approve
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
 
 
