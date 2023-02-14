@@ -4,7 +4,7 @@ variable "project" {
 }
 
 variable "docker_tag" {
-   type=string
+  type = string
 }
 
 variable "region" {
