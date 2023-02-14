@@ -36,9 +36,8 @@ jobs:
     needs: push_to_registry
     name: Build Google Cloud Infrastructure
     runs-on: ubuntu-latest
-    env: 
-      # TF_LOG: DEBUG
-      TF_VAR_docker_tag: $IMAGE_TAG
+    env:
+      TF_VAR_docker_tag: ${{ github.sha }}
     defaults:
       run:
         working-directory: ./infrastructure
