@@ -31,6 +31,9 @@ jobs:
           file: ./infrastructure/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USER }}/backend:${{ env.IMAGE_TAG }}
+      
+      - name: Wait for Docker image to become updated  
+        run: sleep 30s
 
   build_cloud_infrastructure:
     needs: push_to_registry
