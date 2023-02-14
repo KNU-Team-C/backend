@@ -42,19 +42,6 @@ resource "docker_image" "backend_image" {
   pull_triggers = [data.docker_registry_image.backend_image.sha256_digest]
 }
 
-resource "null_resource" "wait_20_seconds" {
-  depends_on = [
-    docker_image.backend_image
-  ]
-  provisioner "local-exec" {
-    command = "sleep 20"
-  }
-
-  triggers = {
-    "image_id" = data.docker_registry_image.backend_image.sha256_digest
-  }
-}
-
 # Enables the Cloud Run API
 resource "google_project_service" "run_api" {
   service = "run.googleapis.com"
@@ -80,7 +67,7 @@ resource "google_cloud_run_service" "backend_server" {
 
   depends_on = [
     google_project_service.run_api,
-    null_resource.wait_20_seconds
+    docker_image.backend_image
   ]
 }
 
