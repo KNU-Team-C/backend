@@ -43,6 +43,13 @@ resource "docker_image" "backend_image" {
   pull_triggers = [data.docker_registry_image.backend_image.sha256_digest]
 }
 
+# Waits for Docker image to be fully updated
+resource "time_sleep" "wait_for_docker_image" {
+  depends_on = [docker_image.backend_image]
+
+  create_duration = "20s"
+}
+
 # Enables the Cloud Run API
 resource "google_project_service" "run_api" {
   service = "run.googleapis.com"
@@ -67,7 +74,7 @@ resource "google_cloud_run_service" "backend_server" {
 
   depends_on = [
     google_project_service.run_api,
-    docker_image.backend_image
+    time_sleep.wait_for_docker_image
   ]
 }
 
