@@ -5,4 +5,4 @@ bp = Blueprint("hello", __name__, url_prefix="/hello")
 
 @bp.route("/", methods=["GET"])
 def hello():
-    return "Hello! This is a mock endpoint! TEST nr 2"
+    return "Hello! This is a mock endpoint! TEST nr 3"
