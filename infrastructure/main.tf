@@ -39,16 +39,9 @@ data "docker_registry_image" "backend_image" {
 }
 
 resource "docker_image" "backend_image" {
-  name          = "${data.docker_registry_image.backend_image.name}@${data.docker_registry_image.backend_image.sha256_digest}"
-  keep_locally  = true
+  name          = data.docker_registry_image.backend_image.name
   pull_triggers = [data.docker_registry_image.backend_image.sha256_digest]
-}
 
-# Waits for Docker image to be fully updated
-resource "time_sleep" "wait_for_docker_image" {
-  depends_on = [docker_image.backend_image]
-
-  create_duration = "20s"
 }
 
 # Enables the Cloud Run API
@@ -58,12 +51,12 @@ resource "google_project_service" "run_api" {
 
 # Creates Google Cloud Run app
 resource "google_cloud_run_service" "backend_server" {
-  name     = "backend-server-development"
+  name     = "backend-server-dev"
   location = var.region
   template {
     spec {
       containers {
-        image = docker_image.backend_image.name
+        image = "teamcknu/backend:latest"
       }
     }
   }
@@ -75,7 +68,7 @@ resource "google_cloud_run_service" "backend_server" {
 
   depends_on = [
     google_project_service.run_api,
-    time_sleep.wait_for_docker_image
+    docker_image.backend_image
   ]
 }
 
