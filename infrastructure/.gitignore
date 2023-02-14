@@ -1,0 +1,4 @@
+.terraform/
+credentials*
+terraform.tfstate*
+*.log

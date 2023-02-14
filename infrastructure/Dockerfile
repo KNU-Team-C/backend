@@ -7,4 +7,6 @@ RUN pip3 install -r requirements.txt
 
 COPY flaskr flaskr
 
-CMD [ "python3", "-m" , "flask", "--app", "flaskr", "run", "--host=0.0.0.0"]
+EXPOSE 8080
+
+CMD [ "python3", "-m" , "flask", "--app", "flaskr", "run", "--host=0.0.0.0", "-p", "8080"]
