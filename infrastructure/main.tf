@@ -52,6 +52,15 @@ resource "time_sleep" "wait_20_seconds" {
   }
 }
 
+resource "null_resource" "wait_20_seconds" {
+  depends_on = [
+    docker_image.backend_image
+  ]
+  provisioner "local-exec" {
+    command = "sleep 20"
+  }
+}
+
 # Enables the Cloud Run API
 resource "google_project_service" "run_api" {
   service = "run.googleapis.com"
@@ -77,7 +86,7 @@ resource "google_cloud_run_service" "backend_server" {
 
   depends_on = [
     google_project_service.run_api,
-    time_sleep.wait_20_seconds
+    null_resource.wait_20_seconds
   ]
 }
 
