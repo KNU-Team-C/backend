@@ -49,6 +49,10 @@ resource "null_resource" "wait_20_seconds" {
   provisioner "local-exec" {
     command = "sleep 20"
   }
+
+  triggers = {
+    "image_id" = data.docker_registry_image.backend_image.sha256_digest
+  }
 }
 
 # Enables the Cloud Run API
