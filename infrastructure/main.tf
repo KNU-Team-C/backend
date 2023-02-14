@@ -40,6 +40,7 @@ data "docker_registry_image" "backend_image" {
 
 resource "docker_image" "backend_image" {
   name          = "${data.docker_registry_image.backend_image.name}@${data.docker_registry_image.backend_image.sha256_digest}"
+  keep_locally  = true
   pull_triggers = [data.docker_registry_image.backend_image.sha256_digest]
 }
 
