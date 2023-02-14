@@ -3,8 +3,8 @@ variable "project" {
   default = "teamc-knu-project"
 }
 
-variable "credentials_file" {
-  default = "credentials.json"
+variable "docker_tag" {
+   type=string
 }
 
 variable "region" {
