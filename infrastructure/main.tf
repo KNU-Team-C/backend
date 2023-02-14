@@ -33,15 +33,13 @@ provider "docker" {
   }
 }
 
-# Pulls the Docker image
 data "docker_registry_image" "backend_image" {
   name = "teamcknu/backend:latest"
 }
 
 resource "docker_image" "backend_image" {
-  name          = data.docker_registry_image.backend_image.name
+  name          = "${data.docker_registry_image.backend_image.name}@${data.docker_registry_image.backend_image.sha256_digest}"
   pull_triggers = [data.docker_registry_image.backend_image.sha256_digest]
-
 }
 
 # Enables the Cloud Run API
@@ -53,10 +51,11 @@ resource "google_project_service" "run_api" {
 resource "google_cloud_run_service" "backend_server" {
   name     = "backend-server-dev"
   location = var.region
+
   template {
     spec {
       containers {
-        image = "teamcknu/backend:latest"
+        image = docker_image.backend_image.name
       }
     }
   }
