@@ -42,16 +42,6 @@ resource "docker_image" "backend_image" {
   pull_triggers = [data.docker_registry_image.backend_image.sha256_digest]
 }
 
-resource "time_sleep" "wait_20_seconds" {
-  depends_on = [docker_image.backend_image]
-
-  create_duration = "20s"
-
-  triggers {
-    image_id = data.docker_registry_image.backend_image.sha256_digest
-  }
-}
-
 resource "null_resource" "wait_20_seconds" {
   depends_on = [
     docker_image.backend_image
