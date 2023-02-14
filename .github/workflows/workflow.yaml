@@ -2,7 +2,7 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - "feature/cloud-database"
+      - "main"
     
 env:
   IMAGE_TAG: ${{ github.sha }}
