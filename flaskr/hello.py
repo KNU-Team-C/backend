@@ -9,5 +9,5 @@ def hello():
 
 
 @bp.route("/greeting", methods=["GET"])
-def hello():
+def hello2():
     return "Hello! This is yet another one test endpoint"
