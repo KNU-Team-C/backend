@@ -12,6 +12,7 @@ class User(db.Model):
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     email = db.Column(db.String(100))
+    companies = db.relationship('Company', backref='user', lazy=True)
     chats = db.relationship("Chat", secondary=chats, lazy='subquery',
                             backref=db.backref('user', lazy=True))
     phone_number = db.Column(db.String(50))
@@ -22,6 +23,10 @@ class User(db.Model):
     is_blocked = db.Column(db.Boolean)
     date_joined = db.Column(db.DateTime(timezone=True))
     messages = db.relationship('Message', backref='user', lazy=True)
+    userReportsPlaintiff = db.relationship('UserReport', backref='plaintiff', lazy=True)
+    userReportsReported = db.relationship('UserReport', backref='reported_user', lazy=True)
+    companyReports = db.relationship('CompanyReport', backref='user', lazy=True)
+    companyFeedbacks = db.relationship('CompanyFeedback', backref='user', lazy=True)
 
 
 class Chat(db.Model):
@@ -51,28 +56,21 @@ class Company(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(100))
     email = db.Column(db.String(100))
+    address = db.Column(db.String(100))
     phone_number = db.Column(db.String(50))
     employees_num = db.Column(db.BigInteger)
     logo_url = db.Column(db.String(2048))
     mini_logo_url = db.Column(db.String(2048))
     location = db.Column(db.String(100))
-    description = db.Column(db.String)
+    description = db.Column(db.Text)
+    is_blocked = db.Column(db.Boolean)
     is_verified = db.Column(db.Boolean)
     date_created = db.Column(db.DateTime(timezone=True))
     projects = db.relationship('Project', backref='company', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='company', lazy=True)
+    companyReports = db.relationship('CompanyReport', backref='company', lazy=True)
     userFeedbacks = db.relationship('UserFeedback', backref='company', lazy=True)
     sets = db.relationship('Set', backref='company', lazy=True)
-
-
-class CompanyFeedback(db.Model):
-    id = db.Column(db.BigInteger, primary_key=True)
-    feedback = db.Column(db.String)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
-                        nullable=False)
-    company_id = db.Column(db.Integer, db.ForeignKey('company.id'),
-                           nullable=False)
-    is_report = db.Column(db.Boolean)
 
 
 class Industry(db.Model):
@@ -84,12 +82,9 @@ class Industry(db.Model):
 
 class Message(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
-    chat_id = db.Column(db.BigInteger, db.ForeignKey('chat.id'),
-                        nullable=False)
-    message = db.Column(db.String)
-    user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'),
-                        nullable=False)
-    mini_ava_url = db.Column(db.String(2048))
+    chat_id = db.Column(db.BigInteger, db.ForeignKey('chat.id'), nullable=False)
+    message = db.Column(db.Text)
+    user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     date = db.Column(db.DateTime(timezone=True))
 
 
@@ -113,16 +108,14 @@ class Project(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     title = db.Column(db.String(100))
     url = db.Column(db.String(100))
-    description = db.Column(db.String)
+    description = db.Column(db.Text)
     logo_url = db.Column(db.String(2048))
-    mini_logo_url = db.Column(db.String(2048))
-    is_verified = db.Column(db.Boolean)
+    is_public = db.Column(db.Boolean)
     technologies = db.relationship('Technology', secondary=technologies, lazy='subquery',
                                    backref=db.backref('project', lazy=True))
     industries = db.relationship('Industry', secondary=industries, lazy='subquery',
                                  backref=db.backref('project', lazy=True))
-    sets = db.relationship('Set', secondary=sets, lazy='subquery',
-                           backref=db.backref('project', lazy=True))
+    sets = db.relationship('Set', secondary=sets, lazy='subquery', backref=db.backref('project', lazy=True))
     attachments = db.relationship('Attachment', backref='project', lazy=True)
 
 
@@ -132,17 +125,31 @@ class Set(db.Model):
     tokens = db.relationship('SetToken', backref='set', lazy=True)
 
 
-class SetTokens(db.Model):
-    set_id = db.Column(db.BigInteger, db.ForeignKey('set.id'),
-                       nullable=False, primary_key=True)
+class SetToken(db.Model):
+    set_id = db.Column(db.BigInteger, db.ForeignKey('set.id'), nullable=False, primary_key=True)
     token = db.Column(db.String(100), primary_key=True)
 
 
-class UserFeedback(db.Model):
+class UserReport(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
-    feedback = db.Column(db.String)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
-                        nullable=False)
-    company_id = db.Column(db.Integer, db.ForeignKey('company.id'),
-                           nullable=False)
-    is_report = db.Column(db.Boolean)
+    report_message = db.Column(db.Text)
+    plaintiff_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
+    reported_user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
+    date_created = db.Column(db.DateTime(timezone=True))
+
+
+class CompanyReport(db.Model):
+    id = db.Column(db.BigInteger, primary_key=True)
+    report_message = db.Column(db.Text)
+    user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
+    company_id = db.Column(db.BigInteger, db.ForeignKey('company.id'), nullable=False)
+    date_created = db.Column(db.DateTime(timezone=True))
+
+
+class CompanyFeedback(db.Model):
+    id = db.Column(db.BigInteger, primary_key=True)
+    feedback = db.Column(db.Text)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False)
+    star = db.Column(db.Float)
+    date_created = db.Column(db.DateTime(timezone=True))
