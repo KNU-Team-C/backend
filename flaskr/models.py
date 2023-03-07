@@ -8,7 +8,6 @@ chats = db.Table('chats',
 
 class User(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
-    username = db.Column(db.String(100))
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     email = db.Column(db.String(100))
