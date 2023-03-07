@@ -1,8 +1,8 @@
 from flaskr.database import db
 
 chats = db.Table('chats',
-                 db.Column('chat_id', db.Integer, db.ForeignKey('chat.id'), primary_key=True),
-                 db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
+                 db.Column('chat_id', db.BigInteger, db.ForeignKey('chat.id'), primary_key=True),
+                 db.Column('user_id', db.BigInteger, db.ForeignKey('user.id'), primary_key=True)
                  )
 
 
@@ -40,7 +40,7 @@ class Chat(db.Model):
 class Technology(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(100))
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id'),
+    project_id = db.Column(db.BigInteger, db.ForeignKey('project.id'),
                            nullable=False)
 
 
@@ -48,7 +48,7 @@ class Attachment(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     link = db.Column(db.String(2048))
     extension = db.Column(db.String(100))
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id'),
+    project_id = db.Column(db.BigInteger, db.ForeignKey('project.id'),
                            nullable=False)
 
 
@@ -76,7 +76,7 @@ class Company(db.Model):
 class Industry(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(100))
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id'),
+    project_id = db.Column(db.BigInteger, db.ForeignKey('project.id'),
                            nullable=False)
 
 
@@ -89,18 +89,18 @@ class Message(db.Model):
 
 
 technologies = db.Table('technologies',
-                        db.Column('technology_id', db.Integer, db.ForeignKey('technology.id'), primary_key=True),
-                        db.Column('project_id', db.Integer, db.ForeignKey('project.id'), primary_key=True)
+                        db.Column('technology_id', db.BigInteger, db.ForeignKey('technology.id'), primary_key=True),
+                        db.Column('project_id', db.BigInteger, db.ForeignKey('project.id'), primary_key=True)
                         )
 
 industries = db.Table('industries',
-                      db.Column('industry_id', db.Integer, db.ForeignKey('industry.id'), primary_key=True),
-                      db.Column('project_id', db.Integer, db.ForeignKey('project.id'), primary_key=True)
+                      db.Column('industry_id', db.BigInteger, db.ForeignKey('industry.id'), primary_key=True),
+                      db.Column('project_id', db.BigInteger, db.ForeignKey('project.id'), primary_key=True)
                       )
 
 sets = db.Table('sets',
-                db.Column('set_id', db.Integer, db.ForeignKey('set.id'), primary_key=True),
-                db.Column('project_id', db.Integer, db.ForeignKey('project.id'), primary_key=True)
+                db.Column('set_id', db.BigInteger, db.ForeignKey('set.id'), primary_key=True),
+                db.Column('project_id', db.BigInteger, db.ForeignKey('project.id'), primary_key=True)
                 )
 
 
@@ -149,7 +149,7 @@ class CompanyReport(db.Model):
 class CompanyFeedback(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     feedback = db.Column(db.Text)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    company_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False)
+    user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
+    company_id = db.Column(db.BigInteger, db.ForeignKey('company.id'), nullable=False)
     star = db.Column(db.Float)
     date_created = db.Column(db.DateTime(timezone=True))
