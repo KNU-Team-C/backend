@@ -2,7 +2,7 @@ import os
 
 from flask import Flask
 
-from flaskr.model import user
+from flaskr import models
 from flaskr.database import db
 
 
