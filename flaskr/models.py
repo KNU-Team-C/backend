@@ -6,6 +6,14 @@ chats = db.Table('chats',
                  )
 
 
+class UserReport(db.Model):
+    id = db.Column(db.BigInteger, primary_key=True)
+    report_message = db.Column(db.Text)
+    plaintiff_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
+    reported_user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
+    date_created = db.Column(db.DateTime(timezone=True))
+
+
 class User(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     first_name = db.Column(db.String(100))
@@ -22,8 +30,10 @@ class User(db.Model):
     is_blocked = db.Column(db.Boolean)
     date_joined = db.Column(db.DateTime(timezone=True))
     messages = db.relationship('Message', backref='user', lazy=True)
-    userReportsPlaintiff = db.relationship('UserReport', backref='plaintiff', lazy=True)
-    userReportsReported = db.relationship('UserReport', backref='reported_user', lazy=True)
+    userReportsPlaintiff = db.relationship('UserReport', backref='plaintiff', lazy=True,
+                                           foreign_keys=[UserReport.plaintiff_id])
+    userReportsReported = db.relationship('UserReport', backref='reported_user', lazy=True,
+                                          foreign_keys=[UserReport.reported_user_id])
     companyReports = db.relationship('CompanyReport', backref='user', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='user', lazy=True)
 
@@ -68,8 +78,8 @@ class Company(db.Model):
     projects = db.relationship('Project', backref='company', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='company', lazy=True)
     companyReports = db.relationship('CompanyReport', backref='company', lazy=True)
-    userFeedbacks = db.relationship('UserFeedback', backref='company', lazy=True)
     sets = db.relationship('Set', backref='company', lazy=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
 class Industry(db.Model):
@@ -116,25 +126,19 @@ class Project(db.Model):
                                  backref=db.backref('project', lazy=True))
     sets = db.relationship('Set', secondary=sets, lazy='subquery', backref=db.backref('project', lazy=True))
     attachments = db.relationship('Attachment', backref='project', lazy=True)
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 
 
 class Set(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(100))
     tokens = db.relationship('SetToken', backref='set', lazy=True)
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 
 
 class SetToken(db.Model):
     set_id = db.Column(db.BigInteger, db.ForeignKey('set.id'), nullable=False, primary_key=True)
     token = db.Column(db.String(100), primary_key=True)
-
-
-class UserReport(db.Model):
-    id = db.Column(db.BigInteger, primary_key=True)
-    report_message = db.Column(db.Text)
-    plaintiff_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
-    reported_user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
-    date_created = db.Column(db.DateTime(timezone=True))
 
 
 class CompanyReport(db.Model):
