@@ -18,7 +18,7 @@ class User(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
-    email = db.Column(db.String(100))
+    email = db.Column(db.String(100), unique=True)
     companies = db.relationship('Company', backref='user', lazy=True)
     chats = db.relationship("Chat", secondary=chats, lazy='subquery',
                             backref=db.backref('user', lazy=True))

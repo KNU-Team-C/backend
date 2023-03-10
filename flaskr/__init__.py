@@ -8,8 +8,9 @@ from flaskr.database import db
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__, instance_relative_config=True, )
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('DATABASE_URI')
+    app.config["SECRET_KEY"] = os.getenv('SECRET_KEY')
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -25,9 +26,10 @@ def create_app(test_config=None):
         pass
 
     # apply the blueprints to the app
-    from flaskr import hello
+    from flaskr import hello, auth
 
     app.register_blueprint(hello.bp)
+    app.register_blueprint(auth.bp)
 
     return app
 
