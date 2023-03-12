@@ -1,10 +1,11 @@
 import os
 
 from flask import Flask
-from flask_socketio import SocketIO
 
 from flaskr import models
+from flaskr import chat
 from flaskr.database import db
+from flaskr.socketio import socketio
 
 
 def create_app(test_config=None):
@@ -35,7 +36,7 @@ def create_app(test_config=None):
 
 app = create_app()
 db.init_app(app)
-socketio = SocketIO(app)
+socketio.init_app(app)
 
 with app.app_context():
     print('Creating database')

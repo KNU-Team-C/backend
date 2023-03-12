@@ -1,6 +1,6 @@
 from flask_socketio import send
 
-from flaskr import socketio
+from flaskr.socketio import socketio
 
 
 @socketio.on('connect')
