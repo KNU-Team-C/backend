@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from flask_socketio import SocketIO
 
 from flaskr import models
 from flaskr.database import db
@@ -34,6 +35,7 @@ def create_app(test_config=None):
 
 app = create_app()
 db.init_app(app)
+socketio = SocketIO(app)
 
 with app.app_context():
     print('Creating database')
