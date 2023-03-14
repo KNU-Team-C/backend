@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import request, jsonify, make_response, Blueprint
 import jwt
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 from flaskr.models import User
 from flaskr.database import db
 import datetime
@@ -42,6 +42,7 @@ def login():
         token = jwt.encode(
             {'public_id': user.id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=45)},
             os.getenv('SECRET_KEY'), "HS256")
+        # os.getenv('SECRET_KEY')
 
         response = {
             "id": user.id,
@@ -62,11 +63,10 @@ def signup():
     first_name = data["first_name"]
     last_name = data["last_name"]
     password = data["password"]
-    hashed_password = generate_password_hash(password, method='sha256')
     email = data["email"]
     phone_number = data["phone_number"]
 
-    user = User(first_name=first_name, last_name=last_name, password=hashed_password, email=email,
+    user = User(first_name=first_name, last_name=last_name, password=password, email=email,
                 phone_number=phone_number)
     db.session.add(user)
     try:
