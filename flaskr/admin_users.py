@@ -17,7 +17,6 @@ def get_users():
     page_size - size of each page
     search_query - search query for users
     """
-    # Retrieve the page number and page size from the request parameters
     page = request.args.get('page', 1, type=int)
     page_size = request.args.get('page_size', 10, type=int)
     statuses = request.args.get('statuses', '', type=str)
@@ -33,10 +32,8 @@ def get_users():
     if search_query:
         query = query.filter(text("first_name || ' ' || last_name LIKE :query").params(query='%'+search_query+'%'))
 
-    # Query the database to retrieve the users for the requested page
     users = query.paginate(page=page, per_page=page_size)
 
-    # Serialize the users to JSON format
     result = {
         'total_pages': users.pages,
         'total_items': users.total,
@@ -54,7 +51,6 @@ def get_users():
         } for user in users.items]
     }
 
-    # Return the serialized result as a JSON response
     return jsonify(result), 200
 
 

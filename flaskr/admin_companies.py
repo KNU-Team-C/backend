@@ -11,7 +11,7 @@ bp = Blueprint("admin_companies", __name__, url_prefix="/admin")
 def get_companies():
     """
     Accepting following query parameters:
-    statuses - statuses of users to get amount. Possible values: 'banned', 'reported', none.
+    statuses - statuses of companies to get. Possible values: 'banned', 'reported', none.
         Values represented as string and can be concatenated in any way
     page - number of the page
     page_size - size of each page
@@ -19,7 +19,6 @@ def get_companies():
     industries_ids - industries
     technologies_ids - technologies
     """
-    # Retrieve the page number and page size from the request parameters
     page = request.args.get('page', 1, type=int)
     page_size = request.args.get('page_size', 10, type=int)
     statuses = request.args.get('statuses', '', type=str)
@@ -55,10 +54,8 @@ def get_companies():
             )
         )
 
-    # Query the database to retrieve the users for the requested page
     companies = query.paginate(page=page, per_page=page_size)
 
-    # Serialize the users to JSON format
     result = {
         'total_pages': companies.pages,
         'total_items': companies.total,
@@ -80,7 +77,6 @@ def get_companies():
         } for company in companies.items]
     }
 
-    # Return the serialized result as a JSON response
     return jsonify(result), 200
 
 
