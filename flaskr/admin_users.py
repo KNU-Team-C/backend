@@ -1,12 +1,8 @@
 from flask import request, jsonify, make_response, Blueprint
-from werkzeug.security import check_password_hash
 
-from flaskr.auth import token_required
 from flaskr.models import User, UserReport
 from flaskr.database import db
-import datetime
-import os
-from sqlalchemy import exists, func, text
+from sqlalchemy import text
 
 bp = Blueprint("admin_users", __name__, url_prefix="/admin")
 
@@ -15,7 +11,7 @@ bp = Blueprint("admin_users", __name__, url_prefix="/admin")
 def get_users():
     """
     Accepting following query parameters:
-    types - types of users to get amount. Possible values: 'banned', 'reported', none.
+    statuses - statuses of users to get amount. Possible values: 'banned', 'reported', none.
         Values represented as string and can be concatenated in any way
     page - number of the page
     page_size - size of each page
@@ -24,13 +20,13 @@ def get_users():
     # Retrieve the page number and page size from the request parameters
     page = request.args.get('page', 1, type=int)
     page_size = request.args.get('page_size', 10, type=int)
-    types = request.args.get('types', '', type=str)
+    statuses = request.args.get('statuses', '', type=str)
     search_query = request.args.get('search_query', '', type=str)
 
     query = db.session.query(User)
-    if 'banned' in types:
+    if 'banned' in statuses:
         query = query.filter(User.is_blocked)
-    if 'reported' in types:
+    if 'reported' in statuses:
         subquery = db.session.query(UserReport.reported_user_id).filter(UserReport.reported_user_id == User.id).exists()
         query = query.filter(subquery)
 

@@ -49,8 +49,6 @@ class Chat(db.Model):
 class Technology(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(100))
-    project_id = db.Column(db.BigInteger, db.ForeignKey('project.id'),
-                           nullable=False)
 
 
 class Attachment(db.Model):
@@ -85,8 +83,6 @@ class Company(db.Model):
 class Industry(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(100))
-    project_id = db.Column(db.BigInteger, db.ForeignKey('project.id'),
-                           nullable=False)
 
 
 class Message(db.Model):
