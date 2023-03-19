@@ -4,6 +4,7 @@ from flask import Flask
 
 from flaskr import models
 from flaskr.database import db
+from flaskr.models import User, UserReport
 
 
 def create_app(test_config=None):
@@ -26,10 +27,11 @@ def create_app(test_config=None):
         pass
 
     # apply the blueprints to the app
-    from flaskr import hello, auth
+    from flaskr import hello, auth, admin_users
 
     app.register_blueprint(hello.bp)
     app.register_blueprint(auth.bp)
+    app.register_blueprint(admin_users.bp)
 
     return app
 
