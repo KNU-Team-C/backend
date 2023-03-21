@@ -26,10 +26,11 @@ def create_app(test_config=None):
         pass
 
     # apply the blueprints to the app
-    from flaskr import hello, auth
+    from flaskr import hello, auth, home
 
     app.register_blueprint(hello.bp)
     app.register_blueprint(auth.bp)
+    app.register_blueprint(home.bp)
 
     return app
 

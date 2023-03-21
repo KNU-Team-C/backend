@@ -1,4 +1,5 @@
 from flaskr.database import db
+from sqlalchemy.sql import func
 
 chats = db.Table('chats',
                  db.Column('chat_id', db.BigInteger, db.ForeignKey('chat.id'), primary_key=True),
@@ -72,14 +73,31 @@ class Company(db.Model):
     mini_logo_url = db.Column(db.String(2048))
     location = db.Column(db.String(100))
     description = db.Column(db.Text)
-    is_blocked = db.Column(db.Boolean)
-    is_verified = db.Column(db.Boolean)
-    date_created = db.Column(db.DateTime(timezone=True))
+    is_blocked = db.Column(db.Boolean, default=False)
+    is_verified = db.Column(db.Boolean, default=False)
+    date_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
     projects = db.relationship('Project', backref='company', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='company', lazy=True)
     companyReports = db.relationship('CompanyReport', backref='company', lazy=True)
     sets = db.relationship('Set', backref='company', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def get_info(self):
+        info = {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "address": self.address,
+            "phone_number": self.phone_number,
+            "employees_num": self.employees_num,
+            "location": self.location,
+            "description": self.description,
+            "user": self.user_id,
+            "is_blocked": self.is_blocked,
+            "is_verified": self.is_verified,
+            "date_created": self.date_created,
+        }
+        return info
 
 
 class Industry(db.Model):
