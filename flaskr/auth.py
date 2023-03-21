@@ -42,7 +42,6 @@ def login():
         token = jwt.encode(
             {'public_id': user.id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=45)},
             os.getenv('SECRET_KEY'), "HS256")
-        # os.getenv('SECRET_KEY')
 
         response = {
             "id": user.id,

@@ -43,7 +43,7 @@ def test_signup_post(test_client):
     data = {
         "first_name": "Max",
         "last_name": "Yudkin",
-        "email": "hort3@gmail.com",
+        "email": "new_user1111@gmail.com",
         "phone_number": "111-11-111",
         "password": "mypass",
     }
