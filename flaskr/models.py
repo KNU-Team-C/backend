@@ -1,4 +1,5 @@
 from flaskr.database import db
+from werkzeug.security import generate_password_hash
 
 chats = db.Table('chats',
                  db.Column('chat_id', db.BigInteger, db.ForeignKey('chat.id'), primary_key=True),
@@ -23,7 +24,7 @@ class User(db.Model):
     chats = db.relationship("Chat", secondary=chats, lazy='subquery',
                             backref=db.backref('user', lazy=True))
     phone_number = db.Column(db.String(50))
-    password = db.Column(db.String(100))
+    password = db.Column(db.String(300))
     ava_url = db.Column(db.String(2048))
     mini_ava_url = db.Column(db.String(2048))
     is_staff = db.Column(db.Boolean)
@@ -36,6 +37,17 @@ class User(db.Model):
                                           foreign_keys=[UserReport.reported_user_id])
     companyReports = db.relationship('CompanyReport', backref='user', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='user', lazy=True)
+
+    def __init__(self, first_name: str, last_name: str, email: str, password: str, phone_number: str):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.email = email
+        self.password = self._generate_password_hash(password)
+        self.phone_number = phone_number
+
+    @staticmethod
+    def _generate_password_hash(password_plaintext: str):
+        return generate_password_hash(password_plaintext)
 
 
 class Chat(db.Model):
