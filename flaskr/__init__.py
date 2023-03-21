@@ -4,11 +4,12 @@ from flask import Flask
 
 from flaskr import models
 from flaskr.database import db
+from flaskr.models import User, UserReport, Technology, Industry, Project, Company
 
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
-    app = Flask(__name__, instance_relative_config=True, )
+    app = Flask(__name__, instance_relative_config=True)
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('DATABASE_URI')
     app.config["SECRET_KEY"] = os.getenv('SECRET_KEY')
 
@@ -26,10 +27,13 @@ def create_app(test_config=None):
         pass
 
     # apply the blueprints to the app
-    from flaskr import hello, auth
+    from flaskr import hello, auth, admin_users, admin_companies, admin_requests
 
     app.register_blueprint(hello.bp)
     app.register_blueprint(auth.bp)
+    app.register_blueprint(admin_users.bp)
+    app.register_blueprint(admin_companies.bp)
+    app.register_blueprint(admin_requests.bp)
 
     return app
 
