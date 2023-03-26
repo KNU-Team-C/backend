@@ -1,12 +1,12 @@
 terraform {
   required_providers {
     google = {
-      source  = "hashicorp/google"
+      source = "hashicorp/google"
       version = "4.58.0"
     }
 
     docker = {
-      source  = "kreuzwerker/docker"
+      source = "kreuzwerker/docker"
       version = "3.0.1"
     }
   }
@@ -20,8 +20,8 @@ terraform {
 provider "google" {
   # credentials = file(var.credentials_file)
   project = var.project
-  region  = var.region
-  zone    = var.zone
+  region = var.region
+  zone = var.zone
 }
 
 provider "docker" {
@@ -57,7 +57,7 @@ resource "google_secret_manager_secret" "jwt_key_secret" {
 
 # Creates Google Cloud Run app
 resource "google_cloud_run_service" "backend_server" {
-  name     = "backend-server-dev"
+  name = "backend-server-dev"
   location = var.region
 
   template {
@@ -88,7 +88,7 @@ resource "google_cloud_run_service" "backend_server" {
   }
 
   traffic {
-    percent         = 100
+    percent = 100
     latest_revision = true
   }
 
@@ -110,8 +110,8 @@ data "google_iam_policy" "noauth" {
 
 resource "google_cloud_run_service_iam_policy" "noauth" {
   location = google_cloud_run_service.backend_server.location
-  project  = google_cloud_run_service.backend_server.project
-  service  = google_cloud_run_service.backend_server.name
+  project = google_cloud_run_service.backend_server.project
+  service = google_cloud_run_service.backend_server.name
 
   policy_data = data.google_iam_policy.noauth.policy_data
 
