@@ -2,7 +2,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "4.51.0"
+      version = "4.58.0"
     }
 
     docker = {
@@ -47,6 +47,14 @@ resource "google_project_service" "run_api" {
   service = "run.googleapis.com"
 }
 
+resource "google_secret_manager_secret" "db_secret" {
+  secret_id = "companies-db-uri"
+}
+
+resource "google_secret_manager_secret" "jwt_key_secret" {
+  secret_id = "jwt-secret-key"
+}
+
 # Creates Google Cloud Run app
 resource "google_cloud_run_service" "backend_server" {
   name     = "backend-server-dev"
@@ -57,6 +65,24 @@ resource "google_cloud_run_service" "backend_server" {
       containers {
         # image = docker_image.backend_image.name
         image = "teamcknu/backend:${var.docker_tag}"
+        env {
+          name = "DATABASE_URI"
+          value_from {
+            secret_key_ref {
+              name = google_secret_manager_secret.db_secret.name
+              key = "latest"
+            }
+          }
+        }
+        env {
+          name = "SECRET_KEY"
+          value_from {
+            secret_key_ref {
+              name = google_secret_manager_secret.jwt_key_secret.name
+              key = "latest"
+            }
+          }
+        }
       }
     }
   }
