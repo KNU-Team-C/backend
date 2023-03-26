@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Update runner dependencies
-        run: sudo apt-get install libpq-dev python-dev
+        run: sudo apt-get install libpq-dev
       - name: Check out the repo
         uses: actions/checkout@v3
 
