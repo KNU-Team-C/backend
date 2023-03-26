@@ -38,13 +38,6 @@ class User(db.Model):
     companyReports = db.relationship('CompanyReport', backref='user', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='user', lazy=True)
 
-    def __init__(self, first_name: str, last_name: str, email: str, password: str, phone_number: str):
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
-        self.password = self._generate_password_hash(password)
-        self.phone_number = phone_number
-
     @staticmethod
     def _generate_password_hash(password_plaintext: str):
         return generate_password_hash(password_plaintext)
