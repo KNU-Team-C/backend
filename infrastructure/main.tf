@@ -49,10 +49,16 @@ resource "google_project_service" "run_api" {
 
 resource "google_secret_manager_secret" "db_secret" {
   secret_id = "companies-db-uri"
+  replication {
+    automatic = true
+  }
 }
 
 resource "google_secret_manager_secret" "jwt_key_secret" {
   secret_id = "jwt-secret-key"
+  replication {
+    automatic = true
+  }
 }
 
 # Creates Google Cloud Run app
