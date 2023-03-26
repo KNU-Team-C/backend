@@ -2,7 +2,7 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - "feature/40-integrate-cloud-db"
+      - "main"
 
 env:
   IMAGE_TAG: ${{ github.sha }}
