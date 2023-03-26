@@ -2,7 +2,7 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - "main"
+      - "fix/enable-cors"
 
 env:
   IMAGE_TAG: ${{ github.sha }}
