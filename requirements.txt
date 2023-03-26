@@ -27,7 +27,6 @@ MarkupSafe==2.1.2
 packaging==23.0
 pipreqs==0.4.11
 pluggy==1.0.0
-psycopg2==2.9.5
 psycopg2-binary==2.9.5
 pycparser==2.21
 PyJWT==2.6.0
