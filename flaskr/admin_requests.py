@@ -30,7 +30,7 @@ def get_requests_companies():
         filters.append(Company.is_verified == False)
     if 'reports' in types or not types:
         subquery = db.session.query(CompanyReport.company_id).filter(
-            CompanyReport.company_id == CompanyReport.id).exists()
+            CompanyReport.company_id == Company.id).exists()
         filters.append(subquery)
 
     if len(filters) > 0:
@@ -82,7 +82,7 @@ def get_requests_users():
     page_size = request.args.get('page_size', 10, type=int)
     search_query = request.args.get('search_query', '', type=str)
 
-    subquery = db.session.query(UserReport.id).filter(UserReport.reported_user_id == UserReport.id).exists()
+    subquery = db.session.query(UserReport.id).filter(UserReport.reported_user_id == User.id).exists()
     query = db.session.query(User).filter(subquery)
 
     if search_query:
