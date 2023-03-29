@@ -4,6 +4,8 @@ from flaskr.models import Industry, industries, Technology, Company, CompanyRepo
 from flaskr.database import db
 from sqlalchemy import text
 
+from flaskr.utils import string_arg_to_ids_list, flat_map
+
 bp = Blueprint("admin_companies", __name__, url_prefix="/admin")
 
 
@@ -109,13 +111,3 @@ def get_industries():
     } for industry in all_industries)
     return make_response(jsonify(response), 200)
 
-
-flat_map = lambda f, xs: [y for ys in xs for y in f(ys)]
-
-
-def string_arg_to_ids_list(arg):
-    result = []
-    for arg_id in arg.split(','):
-        if arg_id:
-            result.append(int(arg_id))
-    return result

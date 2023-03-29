@@ -1,12 +1,14 @@
-from functools import wraps
-from flask import request, jsonify, make_response, Blueprint
-import jwt
-from werkzeug.security import check_password_hash
-from flaskr.models import User
-from flaskr.database import db
 import datetime
 import os
+from functools import wraps
+
+import jwt
+from flask import request, jsonify, make_response, Blueprint
 from sqlalchemy.exc import IntegrityError
+from werkzeug.security import check_password_hash
+
+from flaskr.database import db
+from flaskr.models import User
 
 bp = Blueprint("auth", __name__, url_prefix="/")
 
@@ -24,7 +26,7 @@ def token_required(f):
             data = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=["HS256"])
             current_user = User.query.filter_by(id=data['public_id']).first()
         except:
-            return jsonify({'message': f'token is invalid'})
+            return jsonify({'message': f'token is invalid'}), 401
 
         return f(current_user, *args, **kwargs)
 
@@ -78,12 +80,15 @@ def signup():
         os.getenv('SECRET_KEY'), "HS256")
 
     response = {
-         "id": user.id,
-         "first_name": first_name,
-         "last_name": last_name,
-         "email": email,
-         "phone_number": phone_number,
-         "token": token,
+        "id": user.id,
+        "first_name": first_name,
+        "last_name": last_name,
+        "is_blocked": user.is_blocked,
+        "is_staff": user.is_staff,
+        "ava_url": user.ava_url,
+        "date_joined": user.date_joined,
+        "email": email,
+        "phone_number": phone_number,
+        "token": token,
     }
     return jsonify(response)
-
