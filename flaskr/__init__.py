@@ -28,21 +28,25 @@ def create_app(test_config=None):
         pass
 
     # apply the blueprints to the app
-    from flaskr import hello, auth, admin_users, admin_companies, admin_requests, company_edit
+    from flaskr import hello, auth, admin_users, admin_companies, admin_requests, \
+        companies, users, industries, technologies
 
     app.register_blueprint(hello.bp)
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin_users.bp)
     app.register_blueprint(admin_companies.bp)
     app.register_blueprint(admin_requests.bp)
-    app.register_blueprint(company_edit.bp)
+    app.register_blueprint(companies.bp)
+    app.register_blueprint(users.bp)
+    app.register_blueprint(industries.bp)
+    app.register_blueprint(technologies.bp)
 
     return app
 
 
 app = create_app()
 db.init_app(app)
-CORS(app)
+CORS(app, resources=r'/*')
 
 with app.app_context():
     print('Creating database')

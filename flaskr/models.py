@@ -1,5 +1,7 @@
-from flaskr.database import db
 from werkzeug.security import generate_password_hash
+
+from flaskr.database import db
+from flaskr.utils import flat_map
 
 chats = db.Table('chats',
                  db.Column('chat_id', db.BigInteger, db.ForeignKey('chat.id'), primary_key=True),
@@ -26,10 +28,9 @@ class User(db.Model):
     phone_number = db.Column(db.String(50))
     password = db.Column(db.String(300))
     ava_url = db.Column(db.String(2048))
-    mini_ava_url = db.Column(db.String(2048))
     is_staff = db.Column(db.Boolean)
-    is_blocked = db.Column(db.Boolean)
-    date_joined = db.Column(db.DateTime(timezone=True))
+    is_blocked = db.Column(db.Boolean, default=False)
+    date_joined = db.Column(db.DateTime(timezone=True), default=db.func.now())
     messages = db.relationship('Message', backref='user', lazy=True)
     userReportsPlaintiff = db.relationship('UserReport', backref='plaintiff', lazy=True,
                                            foreign_keys=[UserReport.plaintiff_id])
@@ -62,6 +63,13 @@ class Technology(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(100))
 
+    def get_info(self):
+        info = {
+            'id': self.id,
+            'name': self.name
+        }
+        return info
+
 
 class Attachment(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
@@ -82,19 +90,51 @@ class Company(db.Model):
     mini_logo_url = db.Column(db.String(2048))
     location = db.Column(db.String(100))
     description = db.Column(db.Text)
-    is_blocked = db.Column(db.Boolean)
-    is_verified = db.Column(db.Boolean)
-    date_created = db.Column(db.DateTime(timezone=True))
+    is_blocked = db.Column(db.Boolean, default=False)
+    is_verified = db.Column(db.Boolean, default=False)
+    date_created = db.Column(db.DateTime(timezone=True), default=db.func.now())
     projects = db.relationship('Project', backref='company', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='company', lazy=True)
     companyReports = db.relationship('CompanyReport', backref='company', lazy=True)
     sets = db.relationship('Set', backref='company', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
+    def get_info(self):
+        info = {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "address": self.address,
+            "phone_number": self.phone_number,
+            "employees_num": self.employees_num,
+            "location": self.location,
+            "description": self.description,
+            "user": self.user_id,
+            "is_blocked": self.is_blocked,
+            "is_verified": self.is_verified,
+            "date_created": self.date_created,
+            'industries': [{
+                'id': industry.id,
+                'name': industry.name
+            } for industry in flat_map(lambda project: project.industries, self.projects)],
+            'technologies': [{
+                'id': technology.id,
+                'name': technology.name
+            } for technology in flat_map(lambda project: project.technologies, self.projects)]
+        }
+        return info
+
 
 class Industry(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(100))
+
+    def get_info(self):
+        info = {
+            'id': self.id,
+            'name': self.name
+        }
+        return info
 
 
 class Message(db.Model):
