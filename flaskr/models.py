@@ -2,6 +2,8 @@ from werkzeug.security import generate_password_hash
 
 from flaskr.database import db
 from flaskr.utils import flat_map
+from sqlalchemy.orm import validates
+import re
 
 chats = db.Table('chats',
                  db.Column('chat_id', db.BigInteger, db.ForeignKey('chat.id'), primary_key=True),
@@ -44,7 +46,41 @@ class User(db.Model):
         self.last_name = last_name
         self.email = email
         self.password = self._generate_password_hash(password)
+        self.temp_password = password
         self.phone_number = phone_number
+
+    @validates("email")
+    def validate_email(self, key, address):
+        emailRegex = re.compile('^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@'
+                                '((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-'
+                                'Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
+        if not emailRegex.match(address):
+            raise ValueError("failed email validation")
+
+    @validates("temp_password")
+    def validate_password(self, key, address):
+        print(address)
+        passwordRegex = re.compile('^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,300}$')
+        if not passwordRegex.match(address):
+            raise ValueError("failed password validation")
+
+    @validates("first_name")
+    def validate_first_name(self, key, address):
+        firstNameRegex = re.compile('^[a-zA-Z]+$')
+        if not firstNameRegex.match(address):
+            raise ValueError("failed first name validation")
+
+    @validates("last_name")
+    def validate_last_name(self, key, address):
+        lastNameRegex = re.compile('^[a-zA-Z]+$')
+        if not lastNameRegex.match(address):
+            raise ValueError("failed last name validation")
+
+    @validates("phone_number")
+    def validate_phone_number(self, key, address):
+        phoneNumberRegex = re.compile('^\d{7,15}$')
+        if not phoneNumberRegex.match(address):
+            raise ValueError("failed phone number validation")
 
     @staticmethod
     def _generate_password_hash(password_plaintext: str):
