@@ -113,6 +113,7 @@ class Company(db.Model):
             "is_blocked": self.is_blocked,
             "is_verified": self.is_verified,
             "date_created": self.date_created,
+            "logo_url":self.logo_url,
             'industries': [{
                 'id': industry.id,
                 'name': industry.name
