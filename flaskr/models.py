@@ -18,7 +18,7 @@ class UserReport(db.Model):
 
 
 class User(db.Model):
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.BigInteger().with_variant(db.Integer, "sqlite"), primary_key=True)
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     email = db.Column(db.String(100), unique=True)
@@ -38,13 +38,6 @@ class User(db.Model):
                                           foreign_keys=[UserReport.reported_user_id])
     companyReports = db.relationship('CompanyReport', backref='user', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='user', lazy=True)
-
-    def __init__(self, first_name: str, last_name: str, email: str, password: str, phone_number: str):
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
-        self.password = self._generate_password_hash(password)
-        self.phone_number = phone_number
 
     @staticmethod
     def _generate_password_hash(password_plaintext: str):
