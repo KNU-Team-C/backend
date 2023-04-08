@@ -1,4 +1,3 @@
-
 variable "project" {
   default = "teamc-knu-project"
 }
