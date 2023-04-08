@@ -169,6 +169,22 @@ class Project(db.Model):
     attachments = db.relationship('Attachment', backref='project', lazy=True)
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 
+    def get_info(self):
+
+        info = {
+            "id": self.id,
+            "title": self.title,
+            "url": self.url,
+            "description": self.description,
+            "logo_url": self.logo_url,
+            "is_public": self.is_public,
+            "company_id": self.company_id,
+            "industries": [{"id": industry.id, "name": industry.name} for industry in self.industries],
+            "technologies": [{"id": technology.id, "name": technology.name} for technology in self.technologies],
+            "attachments": [{"id": attachment.id, "extension": attachment.extension} for attachment in self.attachments]
+        }
+        return info
+
 
 class Set(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
