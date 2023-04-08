@@ -5,7 +5,7 @@ from functools import wraps
 import jwt
 from flask import request, jsonify, make_response, Blueprint
 from sqlalchemy.exc import IntegrityError
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from flaskr.database import db
 from flaskr.models import User
@@ -63,7 +63,7 @@ def signup():
     data = request.form
     first_name = data["first_name"]
     last_name = data["last_name"]
-    password = data["password"]
+    password = generate_password_hash(data["password"])
     email = data["email"]
     phone_number = data["phone_number"]
 
@@ -72,7 +72,7 @@ def signup():
     db.session.add(user)
     try:
         db.session.commit()
-    except IntegrityError:
+    except IntegrityError as e:
         return make_response('Such email was registered', 409)
 
     token = jwt.encode(
