@@ -103,6 +103,7 @@ class Company(db.Model):
             "location": self.location,
             "description": self.description,
             "user": self.user_id,
+            "logo": self.logo_url,
             "is_blocked": self.is_blocked,
             "is_verified": self.is_verified,
             "date_created": self.date_created,
@@ -170,6 +171,8 @@ class Project(db.Model):
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 
     def get_info(self):
+        query = db.session.query(Company)
+        company = query.filter(Company.id == self.company_id).first()
 
         info = {
             "id": self.id,
@@ -178,7 +181,7 @@ class Project(db.Model):
             "description": self.description,
             "logo_url": self.logo_url,
             "is_public": self.is_public,
-            "company_id": self.company_id,
+            "company": company.get_info(),
             "industries": [{"id": industry.id, "name": industry.name} for industry in self.industries],
             "technologies": [{"id": technology.id, "name": technology.name} for technology in self.technologies],
             "attachments": [{"id": attachment.id, "extension": attachment.extension} for attachment in self.attachments]
