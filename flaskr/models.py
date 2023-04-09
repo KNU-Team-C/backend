@@ -1,3 +1,4 @@
+from sqlalchemy import Integer
 from werkzeug.security import generate_password_hash
 
 from flaskr.database import db
@@ -155,7 +156,7 @@ sets = db.Table('sets',
 
 
 class Project(db.Model):
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.BigInteger().with_variant(Integer, "sqlite"), primary_key=True)
     title = db.Column(db.String(100))
     url = db.Column(db.String(100))
     description = db.Column(db.Text)
