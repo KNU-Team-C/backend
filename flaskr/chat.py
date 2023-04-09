@@ -3,15 +3,15 @@ import os
 
 from flask import jsonify
 from flask_socketio import send, join_room, leave_room
-from jwt import jwt
+import jwt
 
 # from flaskr import db
 from flaskr.models import Chat, Message, User
 from flaskr.socketio import socketio
 
 
-def add_message_to_db(data):
-    # chat = Chat.query.filter_by(id=data["chat-id"]).first()
+def add_message_to_db(chat_name, data):
+    # chat = Chat.query.filter_by(name=data[chat_name]).first()
     # chat.messages.append(data["message"])
     # db.session.commit()
     return
@@ -21,15 +21,20 @@ def auth_user(f):
     def wrapped(token, *args, **kwargs):
         print('token: ', token)
 
-        if not token:
+        if token != 'tkn':
             send('Token is missing!')
             return
-        try:
-            data = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=["HS256"])
-            user = User.query.filter_by(id=data['public_id']).first()
-        except:
-            send('Token is invalid!')
-            return
+
+        user = 'user'
+        # if not token:
+        #     send('Token is missing!')
+        #     return
+        # try:
+        #     data = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=["HS256"])
+        #     user = User.query.filter_by(id=data['public_id']).first()
+        # except:
+        #     send('Token is invalid!')
+        #     return
 
         f(user, *args, **kwargs)
 
@@ -82,7 +87,7 @@ def handle_chat_message(user, data):
     # data to be json
     data = json.loads(data)
 
-    add_message_to_db(Message(message=data["message"], user_id=data["sender-id"]))
+    add_message_to_db(data["chat-id"], Message(message=data["message"], user_id=data["sender-id"]))
 
     print('Received chat message: ', data["chat-id"], data["sender-id"], data["message"])
 
