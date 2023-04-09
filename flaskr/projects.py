@@ -99,7 +99,6 @@ def project_edit(project_id):
     db.session.commit()
 
     response = project.get_info()
-    print("asdasd " + str(response))
     return jsonify(response)
 
 
