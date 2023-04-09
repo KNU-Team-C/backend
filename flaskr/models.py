@@ -1,4 +1,7 @@
+from werkzeug.security import generate_password_hash
+
 from flaskr.database import db
+from flaskr.utils import flat_map
 
 chats = db.Table('chats',
                  db.Column('chat_id', db.BigInteger, db.ForeignKey('chat.id'), primary_key=True),
@@ -15,7 +18,7 @@ class UserReport(db.Model):
 
 
 class User(db.Model):
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.BigInteger().with_variant(db.Integer, "sqlite"), primary_key=True)
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     email = db.Column(db.String(100), unique=True)
@@ -23,12 +26,11 @@ class User(db.Model):
     chats = db.relationship("Chat", secondary=chats, lazy='subquery',
                             backref=db.backref('user', lazy=True))
     phone_number = db.Column(db.String(50))
-    password = db.Column(db.String(100))
+    password = db.Column(db.String(300))
     ava_url = db.Column(db.String(2048))
-    mini_ava_url = db.Column(db.String(2048))
     is_staff = db.Column(db.Boolean)
-    is_blocked = db.Column(db.Boolean)
-    date_joined = db.Column(db.DateTime(timezone=True))
+    is_blocked = db.Column(db.Boolean, default=False)
+    date_joined = db.Column(db.DateTime(timezone=True), default=db.func.now())
     messages = db.relationship('Message', backref='user', lazy=True)
     userReportsPlaintiff = db.relationship('UserReport', backref='plaintiff', lazy=True,
                                            foreign_keys=[UserReport.plaintiff_id])
@@ -36,6 +38,10 @@ class User(db.Model):
                                           foreign_keys=[UserReport.reported_user_id])
     companyReports = db.relationship('CompanyReport', backref='user', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='user', lazy=True)
+
+    @staticmethod
+    def _generate_password_hash(password_plaintext: str):
+        return generate_password_hash(password_plaintext)
 
 
 class Chat(db.Model):
@@ -49,8 +55,13 @@ class Chat(db.Model):
 class Technology(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(100))
-    project_id = db.Column(db.BigInteger, db.ForeignKey('project.id'),
-                           nullable=False)
+
+    def get_info(self):
+        info = {
+            'id': self.id,
+            'name': self.name
+        }
+        return info
 
 
 class Attachment(db.Model):
@@ -72,21 +83,51 @@ class Company(db.Model):
     mini_logo_url = db.Column(db.String(2048))
     location = db.Column(db.String(100))
     description = db.Column(db.Text)
-    is_blocked = db.Column(db.Boolean)
-    is_verified = db.Column(db.Boolean)
-    date_created = db.Column(db.DateTime(timezone=True))
+    is_blocked = db.Column(db.Boolean, default=False)
+    is_verified = db.Column(db.Boolean, default=False)
+    date_created = db.Column(db.DateTime(timezone=True), default=db.func.now())
     projects = db.relationship('Project', backref='company', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='company', lazy=True)
     companyReports = db.relationship('CompanyReport', backref='company', lazy=True)
     sets = db.relationship('Set', backref='company', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
+    def get_info(self):
+        info = {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "address": self.address,
+            "phone_number": self.phone_number,
+            "employees_num": self.employees_num,
+            "location": self.location,
+            "description": self.description,
+            "user": self.user_id,
+            "is_blocked": self.is_blocked,
+            "is_verified": self.is_verified,
+            "date_created": self.date_created,
+            'industries': [{
+                'id': industry.id,
+                'name': industry.name
+            } for industry in flat_map(lambda project: project.industries, self.projects)],
+            'technologies': [{
+                'id': technology.id,
+                'name': technology.name
+            } for technology in flat_map(lambda project: project.technologies, self.projects)]
+        }
+        return info
+
 
 class Industry(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(100))
-    project_id = db.Column(db.BigInteger, db.ForeignKey('project.id'),
-                           nullable=False)
+
+    def get_info(self):
+        info = {
+            'id': self.id,
+            'name': self.name
+        }
+        return info
 
 
 class Message(db.Model):
@@ -127,6 +168,22 @@ class Project(db.Model):
     sets = db.relationship('Set', secondary=sets, lazy='subquery', backref=db.backref('project', lazy=True))
     attachments = db.relationship('Attachment', backref='project', lazy=True)
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+
+    def get_info(self):
+
+        info = {
+            "id": self.id,
+            "title": self.title,
+            "url": self.url,
+            "description": self.description,
+            "logo_url": self.logo_url,
+            "is_public": self.is_public,
+            "company_id": self.company_id,
+            "industries": [{"id": industry.id, "name": industry.name} for industry in self.industries],
+            "technologies": [{"id": technology.id, "name": technology.name} for technology in self.technologies],
+            "attachments": [{"id": attachment.id, "extension": attachment.extension} for attachment in self.attachments]
+        }
+        return info
 
 
 class Set(db.Model):

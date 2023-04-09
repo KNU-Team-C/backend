@@ -33,15 +33,6 @@ provider "docker" {
   }
 }
 
-# data "docker_registry_image" "backend_image" {
-#   name = "teamcknu/backend:latest"
-# }
-
-# resource "docker_image" "backend_image" {
-#   name          = "${data.docker_registry_image.backend_image.name}@${data.docker_registry_image.backend_image.sha256_digest}"
-#   pull_triggers = [data.docker_registry_image.backend_image.sha256_digest]
-# }
-
 # Enables the Cloud Run API
 resource "google_project_service" "run_api" {
   service = "run.googleapis.com"
@@ -55,8 +46,25 @@ resource "google_cloud_run_service" "backend_server" {
   template {
     spec {
       containers {
-        # image = docker_image.backend_image.name
         image = "teamcknu/backend:${var.docker_tag}"
+        env {
+          name = "DATABASE_URI"
+          value_from {
+            secret_key_ref {
+              name = "companies-db-uri"
+              key  = "latest"
+            }
+          }
+        }
+        env {
+          name = "SECRET_KEY"
+          value_from {
+            secret_key_ref {
+              name = "jwt-secret-key"
+              key  = "latest"
+            }
+          }
+        }
       }
     }
   }
@@ -68,7 +76,6 @@ resource "google_cloud_run_service" "backend_server" {
 
   depends_on = [
     google_project_service.run_api,
-    # docker_image.backend_image
   ]
 }
 
