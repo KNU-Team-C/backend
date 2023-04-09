@@ -15,7 +15,7 @@ def create_project(current_user):
     title = data['title']
     url = data['url']
     description = data['description']
-    is_public = data['isPublic']
+    is_public = bool(data['isPublic'])
     technologies_id = data['technologies']
     industries_id = data['industries']
     attachments_id = data['attachments']
@@ -57,36 +57,51 @@ def project_edit(current_user, project_id):
 
     project = query.filter(Project.id == project_id).first()
     if is_my_company(current_user, project.company_id):
-        project.title = data['title']
-        project.url = data['url']
-        project.description = data['description']
-        project.logo_url = data['logo_url']
-        project.is_public = data['is_public']
-        project.company_id = data['company_id']
-        technologies_id = data['technologies']
-        industries_id = data['industries']
-        attachments_id = data['attachments']
+        new_title = data.get('title', None)
+        new_url = data.get('url', None)
+        new_description = data.get('description', None)
+        new_logo_url = data.get('logo_url', None)
+        new_is_public = bool(data.get('is_public', None))
+        new_company_id = data.get('company_id', None)
+        if new_title is not None:
+            project.title = new_title
+        if new_url is not None:
+            project.url = new_url
+        if new_description is not None:
+            project.description = new_description
+        if new_logo_url is not None:
+            project.logo_url = new_logo_url
+        if new_is_public is not None:
+            project.is_public = new_is_public
+        if new_company_id is not None:
+            project.company_id = new_company_id
+        technologies_id = data.get('technologies', None)
+        industries_id = data.get('industries', None)
+        attachments_id = data.get('attachments', None)
 
-        new_techlogies = []
-        for technology_id in technologies_id:
-            technology = Technology.query.filter(Technology.id == technology_id).first()
-            if technology is not None:
-                new_techlogies.append(technology)
-        project.technologies = new_techlogies
+        if technologies_id is not None:
+            new_technologies = []
+            for technology_id in technologies_id:
+                technology = Technology.query.filter(Technology.id == technology_id).first()
+                if technology is not None:
+                    new_technologies.append(technology)
+            project.technologies = new_technologies
 
-        new_industries = []
-        for industrie_id in industries_id:
-            industrie = Industry.query.filter(Industry.id == industrie_id).first()
-            if industrie is not None:
-                new_industries.append(industrie)
-        project.industries = new_industries
+        if industries_id is not None:
+            new_industries = []
+            for industry_id in industries_id:
+                industry = Industry.query.filter(Industry.id == industry_id).first()
+                if industry is not None:
+                    new_industries.append(industry)
+            project.industries = new_industries
 
-        new_attachments = []
-        for attachment_id in attachments_id:
-            attachment = Attachment.query.filter(Attachment.id == attachment_id).first()
-            if attachment is not None:
-                new_attachments.append(attachment)
-        project.attachments = new_attachments
+        if attachments_id is not None:
+            new_attachments = []
+            for attachment_id in attachments_id:
+                attachment = Attachment.query.filter(Attachment.id == attachment_id).first()
+                if attachment is not None:
+                    new_attachments.append(attachment)
+            project.attachments = new_attachments
 
         db.session.commit()
 
