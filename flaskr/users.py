@@ -62,11 +62,21 @@ def change_user_by_id(current_user, user_id):
         return make_response(f'User with id {user_id} does not exist', 400)
     else:
         data = request.get_json()
-        user.first_name = data["firstName"]
-        user.last_name = data["lastName"]
-        user.password = generate_password_hash(data["password"])
-        user.email = data["email"]
-        user.phone_number = data["phoneNumber"]
+        new_first_name = data["first_name"]
+        new_last_name = data["last_name"]
+        new_password = data["password"]
+        new_email = data["email"]
+        new_phone_number = data["phone_number"]
+        if new_first_name is not None:
+            user.first_name = new_first_name
+        if new_last_name is not None:
+            user.last_name = new_last_name
+        if new_password is not None:
+            user.password = new_password
+        if new_email is not None:
+            user.email = new_email
+        if new_phone_number is not None:
+            user.phone_number = new_phone_number
         db.session.commit()
         response = {
             "id": user.id,
