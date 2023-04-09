@@ -3,6 +3,7 @@ from flask import jsonify, Blueprint, request, make_response
 from flaskr.auth import token_required
 from flaskr.database import db
 from flaskr.models import Project, Technology, Industry, Attachment, Company
+from flaskr.utils import filter_by_text, string_arg_to_ids_list
 
 bp = Blueprint("projects", __name__, url_prefix="/projects")
 
@@ -95,10 +96,41 @@ def project_edit(current_user, project_id):
         return make_response('could not verify project', 401)
 
 
+@bp.route('/<project_id>', methods=['GET'])
+def get_project(project_id):
+    project = Project.query.get(project_id)
+    return make_response(jsonify(project.get_info()), 401)
+
+
+@bp.route('', methods=['GET'])
+def get_projects():
+    search_query = request.args.get('search_query', '', type=str)
+    query = db.session.query(Project)
+    query = filter_by_text(search_query, query, field='title')
+
+    industries_ids = string_arg_to_ids_list(request.args.get('industries_ids', '', type=str))
+    technologies_ids = string_arg_to_ids_list(request.args.get('technologies_ids', '', type=str))
+
+    if len(industries_ids) > 0:
+        query = query.filter(
+            Project.industries.any(
+                Industry.id.in_(industries_ids)
+            )
+        )
+    if len(technologies_ids) > 0:
+        query = query.filter(
+            Project.technologies.any(
+                Technology.id.in_(technologies_ids)
+            )
+        )
+
+    projects = query.all()
+    return jsonify([p.get_info() for p in projects]), 200
+
+
 @bp.route('/<project_id>', methods=['DELETE'])
 @token_required
 def project_delete(current_user, project_id):
-
     project = Project.query.get(project_id)
     if is_my_company(current_user, project.company_id):
         db.session.delete(project)
@@ -116,5 +148,3 @@ def is_my_company(user, company_id):
     query = db.session.query(Company)
     company = query.filter(Company.id == company_id).first()
     return company.user_id == user.id
-
-

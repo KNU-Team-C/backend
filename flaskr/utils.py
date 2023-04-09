@@ -12,7 +12,7 @@ def string_arg_to_ids_list(arg):
 flat_map = lambda f, xs: [y for ys in xs for y in f(ys)]
 
 
-def filter_by_text(text_str, query):
+def filter_by_text(text_str, query, field='name'):
     if len(text_str) > 0:
-        return query.filter(text("LOWER(name) LIKE LOWER(:query)").params(query=text_str + '%'))
+        return query.filter(text(f"LOWER({field}) LIKE LOWER(:query)").params(query=text_str + '%'))
     return query
