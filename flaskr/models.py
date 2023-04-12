@@ -16,6 +16,20 @@ class UserReport(db.Model):
     plaintiff_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     reported_user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     date_created = db.Column(db.DateTime(timezone=True))
+    is_resolved = db.Column(db.Boolean, default=False)
+    date_resolved = db.Column(db.DateTime(timezone=True))
+
+    def get_info(self):
+        info = {
+            'id': self.id,
+            'report_message': self.report_message,
+            'plaintiff': self.plaintiff.get_info(),
+            'reported_user': self.reported_user.get_info(),
+            'date_created': self.date_created,
+            'is_resolved': self.is_resolved,
+            'date_resolved': self.date_resolved
+        }
+        return info
 
 
 class User(db.Model):
@@ -208,6 +222,20 @@ class CompanyReport(db.Model):
     user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     company_id = db.Column(db.BigInteger, db.ForeignKey('company.id'), nullable=False)
     date_created = db.Column(db.DateTime(timezone=True))
+    is_resolved = db.Column(db.Boolean, default=False)
+    date_resolved = db.Column(db.DateTime(timezone=True))
+
+    def get_info(self):
+        info = {
+            "id": self.id,
+            "report_message": self.report_message,
+            "user_id": self.user_id,
+            "company_id": self.company_id,
+            "date_created": self.date_created,
+            "is_resolved": self.is_resolved,
+            "date_resolved": self.date_resolved
+        }
+        return info
 
 
 class CompanyFeedback(db.Model):
