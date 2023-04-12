@@ -1,19 +1,26 @@
 import json
 import os
 
-from flask import jsonify
 from flask_socketio import send, join_room, leave_room
 import jwt
 
-# from flaskr import db
+from flaskr.database import db
 from flaskr.models import Chat, Message, User
 from flaskr.socketio import socketio
 
 
 def add_message_to_db(chat_name, data):
-    # chat = Chat.query.filter_by(name=data[chat_name]).first()
-    # chat.messages.append(data["message"])
-    # db.session.commit()
+    chat = Chat.query.filter_by(name=data[chat_name]).first()
+    if not chat:
+        chat = Chat(name=data[chat_name])
+        db.session.add(chat)
+        db.session.commit()
+    else:
+        chat = Chat.query.filter_by(name=data["chat-id"]).first()
+        messages = Message.query.filter_by(chat_id=chat.id).all()
+        messages.append(Message(text=data['message'], user_id=data['sender-id'], chat_id=chat.id))
+        db.session.commit()
+
     return
 
 
@@ -21,20 +28,15 @@ def auth_user(f):
     def wrapped(token, *args, **kwargs):
         print('token: ', token)
 
-        if token != 'tkn':
+        if not token:
             send('Token is missing!')
             return
-
-        user = 'user'
-        # if not token:
-        #     send('Token is missing!')
-        #     return
-        # try:
-        #     data = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=["HS256"])
-        #     user = User.query.filter_by(id=data['public_id']).first()
-        # except:
-        #     send('Token is invalid!')
-        #     return
+        try:
+            data = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=["HS256"])
+            user = User.query.filter_by(id=data['public_id']).first()
+        except:
+            send('Token is invalid!')
+            return
 
         f(user, *args, **kwargs)
 
@@ -45,6 +47,10 @@ def auth_user(f):
 def handle_connect():
     print('Client connected')
 
+
+@socketio.on_error_default
+def default_error_handler(e):
+    print("An error occurred:", e)
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -87,7 +93,7 @@ def handle_chat_message(user, data):
     # data to be json
     data = json.loads(data)
 
-    add_message_to_db(data["chat-id"], Message(message=data["message"], user_id=data["sender-id"]))
+    add_message_to_db(data["chat-id"], data)
 
     print('Received chat message: ', data["chat-id"], data["sender-id"], data["message"])
 
