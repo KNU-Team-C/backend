@@ -23,7 +23,7 @@ class User(db.Model):
     last_name = db.Column(db.String(100))
     email = db.Column(db.String(100), unique=True)
     companies = db.relationship('Company', backref='user', lazy=True)
-    chats = db.relationship("Chat", secondary=chats, lazy='subquery',
+    chats = db.relationship("Chat", secondary=chats, lazy='dynamic',
                             backref=db.backref('user', lazy=True))
     phone_number = db.Column(db.String(50))
     password = db.Column(db.String(300))
@@ -51,6 +51,16 @@ class Chat(db.Model):
     mini_ava_url = db.Column(db.String(2048))
     messages = db.relationship('Message', backref='chat', lazy=True)
 
+    def get_info(self, user_id):
+        # chat_name  should be user2 name
+
+        info = {
+            'id': self.id,
+            'chat_name': self.chat_name,
+            'ava_url': self.ava_url,
+            'mini_ava_url': self.mini_ava_url,
+        }
+        return info
 
 class Technology(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
@@ -136,6 +146,16 @@ class Message(db.Model):
     message = db.Column(db.Text)
     user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     date = db.Column(db.DateTime(timezone=True))
+
+    def get_info(self):
+        info = {
+            'id': self.id,
+            'chat_id': self.chat_id,
+            'message': self.message,
+            'user_id': self.user_id,
+            'date': self.date
+        }
+        return info
 
 
 technologies = db.Table('technologies',

@@ -1,6 +1,7 @@
 import json
 import os
 
+from flask import jsonify
 from flask_socketio import send, join_room, leave_room
 import jwt
 
@@ -9,19 +10,19 @@ from flaskr.models import Chat, Message, User
 from flaskr.socketio import socketio
 
 
-def add_message_to_db(chat_name, data):
-    chat = Chat.query.filter_by(name=data[chat_name]).first()
+def add_message_to_db(chat_id, data, user):
+    chat = Chat.query.filter_by(id=chat_id).first()
     if not chat:
-        chat = Chat(name=data[chat_name])
-        db.session.add(chat)
-        db.session.commit()
+        return 'Chat not found!'
     else:
-        chat = Chat.query.filter_by(name=data["chat-id"]).first()
-        messages = Message.query.filter_by(chat_id=chat.id).all()
-        messages.append(Message(text=data['message'], user_id=data['sender-id'], chat_id=chat.id))
-        db.session.commit()
+        try:
+            messages = chat.messages
+            messages.append(Message(message=data['message'], user_id=user.id))
+            db.session.commit()
+        except:
+            return 'Error while adding message to db!'
 
-    return
+    return 'Message sent!'
 
 
 def auth_user(f):
@@ -93,8 +94,6 @@ def handle_chat_message(user, data):
     # data to be json
     data = json.loads(data)
 
-    add_message_to_db(data["chat-id"], data)
+    result = add_message_to_db(data["chat-id"], data, user)
 
-    print('Received chat message: ', data["chat-id"], data["sender-id"], data["message"])
-
-    send(data, room=data["chat-id"], broadcast=True)
+    send(result, room=data["chat-id"], broadcast=True)
