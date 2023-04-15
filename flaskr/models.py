@@ -162,6 +162,7 @@ class Company(db.Model):
     description = db.Column(db.Text)
     is_blocked = db.Column(db.Boolean, default=False)
     is_verified = db.Column(db.Boolean, default=False)
+    is_verification_request_pending = db.Column(db.Boolean, default=False)
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.now())
     projects = db.relationship('Project', backref='company', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='company', lazy=True)

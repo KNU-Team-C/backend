@@ -9,6 +9,30 @@ from flaskr.utils import string_arg_to_ids_list, flat_map
 bp = Blueprint("admin_companies", __name__, url_prefix="/admin")
 
 
+@bp.route('/company/<company_id>/verify_request_cancel', methods=['POST'])
+def verify_company(company_id):
+    query = db.session.query(Company)
+
+    company = query.filter(Company.id == company_id).first()
+    company.is_verification_request_pending = False
+
+    db.session.commit()
+
+    return 200
+
+
+@bp.route('/company/<company_id>/verify', methods=['POST'])
+def verify_company(company_id):
+    query = db.session.query(Company)
+
+    company = query.filter(Company.id == company_id).first()
+    company.is_verified = True
+
+    db.session.commit()
+
+    return 200
+
+
 @bp.route('/companies', methods=['GET'])
 def get_companies():
     """
@@ -56,6 +80,8 @@ def get_companies():
             )
         )
 
+    query.filter(Company.is_verification_request_pending == True)
+
     companies = query.paginate(page=page, per_page=page_size)
 
     result = {
@@ -76,6 +102,10 @@ def get_companies():
                 'id': technology.id,
                 'name': technology.name
             } for technology in flat_map(lambda project: project.technologies, company.projects)],
+            "reports": [{
+                'id': report.id,
+                'message': report.report_message,
+            } for report in company.companyReports]
         } for company in companies.items]
     }
 
@@ -110,4 +140,3 @@ def get_industries():
         'amount': db.session.query(industries).filter_by(industry_id=industry.id).count()
     } for industry in all_industries)
     return make_response(jsonify(response), 200)
-
