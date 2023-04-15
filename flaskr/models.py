@@ -65,37 +65,42 @@ class User(db.Model):
         self.phone_number = phone_number
 
     @validates("email")
-    def validate_email(self, key, address):
-        emailRegex = re.compile('^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@'
+    def validate_email(self, key, value):
+        email_regex = re.compile('^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@'
                                 '((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-'
                                 'Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
-        if not emailRegex.match(address):
+        if not email_regex.match(value):
             raise ValueError("failed email validation")
+        return value
 
     @validates("temp_password")
-    def validate_password(self, key, address):
-        print(address)
-        passwordRegex = re.compile('^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,300}$')
-        if not passwordRegex.match(address):
+    def validate_password(self, key, value):
+        print(value)
+        password_regex = re.compile('^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,300}$')
+        if not password_regex.match(value):
             raise ValueError("failed password validation")
+        return value
 
     @validates("first_name")
-    def validate_first_name(self, key, address):
-        firstNameRegex = re.compile('^[a-zA-Z]+$')
-        if not firstNameRegex.match(address):
+    def validate_first_name(self, key, value):
+        first_name_regex = re.compile('^[a-zA-Z]+$')
+        if not first_name_regex.match(value):
             raise ValueError("failed first name validation")
+        return value
 
     @validates("last_name")
-    def validate_last_name(self, key, address):
-        lastNameRegex = re.compile('^[a-zA-Z]+$')
-        if not lastNameRegex.match(address):
+    def validate_last_name(self, key, value):
+        last_name_regex = re.compile('^[a-zA-Z]+$')
+        if not last_name_regex.match(value):
             raise ValueError("failed last name validation")
+        return value
 
     @validates("phone_number")
-    def validate_phone_number(self, key, address):
-        phoneNumberRegex = re.compile('^\d{7,15}$')
-        if not phoneNumberRegex.match(address):
+    def validate_phone_number(self, key, value):
+        phone_number_regex = re.compile('^\d{7,15}$')
+        if not phone_number_regex.match(value):
             raise ValueError("failed phone number validation")
+        return value
 
     @staticmethod
     def _generate_password_hash(password_plaintext: str):
