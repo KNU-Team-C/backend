@@ -4,7 +4,7 @@ from sqlalchemy import text
 from flaskr.auth import token_required
 from flaskr.database import db
 from flaskr.models import Company, Project, Industry, Technology
-from flaskr.utils import string_arg_to_ids_list, flat_map, filter_by_text
+from flaskr.utils import string_arg_to_ids_list, filter_by_text
 
 bp = Blueprint("companies", __name__, url_prefix="/companies")
 
@@ -51,25 +51,7 @@ def get_company(company_id):
     query = db.session.query(Company)
     company = query.filter(Company.id == company_id).first()
 
-    result = {
-        'id': company.id,
-        'name': company.name,
-        'email': company.address,
-        'phone_number': company.phone_number,
-        'logo_url': company.logo_url,
-        'location': company.location,
-        'description': company.description,
-        'is_blocked': company.is_blocked,
-        'is_verified': company.is_verified,
-        'industries': [{
-            'id': industry.id,
-            'name': industry.name
-        } for industry in flat_map(lambda project: project.industries, company.projects)],
-        'technologies': [{
-            'id': technology.id,
-            'name': technology.name
-        } for technology in flat_map(lambda project: project.technologies, company.projects)]
-    }
+    result = company.get_info()
     return jsonify(result), 200
 
 
@@ -80,14 +62,15 @@ def edit_company(company_id):
 
     company = query.filter(Company.id == company_id).first()
     company.name = data['name']
-    company.email = data['address']
-    company.phone_number = data['phone_number']
+    company.email = data['email']
+    company.address = data['address']
+    company.phone_number = data['phoneNumber']
     company.location = data['location']
     company.description = data['description']
 
     db.session.commit()
 
-    return 200
+    return jsonify(company.get_info())
 
 
 def get_all_companies(request, user=None):
