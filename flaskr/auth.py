@@ -52,6 +52,7 @@ def login():
             "last_name": user.last_name,
             "email": user.email,
             "phone_number": user.phone_number,
+            "is_staff": user.is_staff,
             "token": token,
         }
         return jsonify(response)
