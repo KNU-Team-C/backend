@@ -56,7 +56,7 @@ def get_companies():
             )
         )
 
-    companies = query.paginate(page=page, per_page=page_size)
+    companies = query.order_by(Company.date_created.desc()).paginate(page=page, per_page=page_size)
 
     result = {
         'total_pages': companies.pages,
