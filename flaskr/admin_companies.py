@@ -10,7 +10,7 @@ bp = Blueprint("admin_companies", __name__, url_prefix="/admin")
 
 
 @bp.route('/company/<company_id>/verify_request_cancel', methods=['POST'])
-def verify_company(company_id):
+def verify_request_cancel(company_id):
     query = db.session.query(Company)
 
     company = query.filter(Company.id == company_id).first()
