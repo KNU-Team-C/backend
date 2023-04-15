@@ -10,7 +10,7 @@ bp = Blueprint("admin_companies", __name__, url_prefix="/admin")
 
 
 @bp.route('/company/<company_id>/verify_request_cancel', methods=['POST'])
-def verify_company(company_id):
+def verify_request_cancel(company_id):
     query = db.session.query(Company)
 
     company = query.filter(Company.id == company_id).first()
@@ -82,7 +82,7 @@ def get_companies():
 
     query.filter(Company.is_verification_request_pending == True)
 
-    companies = query.paginate(page=page, per_page=page_size)
+    companies = query.order_by(Company.date_created.desc()).paginate(page=page, per_page=page_size)
 
     result = {
         'total_pages': companies.pages,

@@ -65,6 +65,24 @@ resource "google_cloud_run_service" "backend_server" {
             }
           }
         }
+        env {
+          name = "IMAGE_UPLOAD_API_URL"
+          value_from {
+            secret_key_ref {
+              name = "image-upload-url"
+              key  = "latest"
+            }
+          }
+        }
+        env {
+          name = "IMAGE_UPLOAD_API_KEY"
+          value_from {
+            secret_key_ref {
+              name = "image-upload-api-key"
+              key  = "latest"
+            }
+          }
+        }
       }
     }
   }
