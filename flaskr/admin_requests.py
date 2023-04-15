@@ -39,6 +39,8 @@ def get_requests_companies():
     if search_query:
         query = query.filter(text("name LIKE :query").params(query='%' + search_query + '%'))
 
+    query.filter(Company.is_verification_request_pending == True)
+
     query = query.order_by(Company.date_created)
 
     companies = query.paginate(page=page, per_page=page_size)
@@ -63,6 +65,10 @@ def get_requests_companies():
                 'id': technology.id,
                 'name': technology.name
             } for technology in flat_map(lambda project: project.technologies, company.projects)],
+            "reports": [{
+                'id': report.id,
+                'message': report.report_message,
+            } for report in company.companyReports]
         } for company in companies.items]
     }
     return jsonify(result), 200
@@ -106,7 +112,11 @@ def get_requests_users():
             'companies': [{
                 'id': company.id,
                 'name': company.name
-            } for company in user.companies]
+            } for company in user.companies],
+            "reports": [{
+                'id': report.id,
+                'message': report.report_message,
+            } for report in user.userReportsReported]
         } for user in users.items]
     }
     return jsonify(result), 200
