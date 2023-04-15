@@ -40,17 +40,7 @@ def get_user_by_id(current_user, user_id):
     if user is None:
         return make_response(f'User with id {user_id} does not exist', 400)
     else:
-        response = {
-            "id": user.id,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "is_blocked": user.is_blocked,
-            "is_staff": user.is_staff,
-            "ava_url": user.ava_url,
-            "date_joined": user.date_joined,
-            "email": user.email,
-            "phone_number": user.phone_number,
-        }
+        response = user.get_info()
     return jsonify(response), 200
 
 
@@ -78,17 +68,7 @@ def change_user_by_id(current_user, user_id):
         if new_phone_number is not None:
             user.phone_number = new_phone_number
         db.session.commit()
-        response = {
-            "id": user.id,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "is_blocked": user.is_blocked,
-            "is_staff": user.is_staff,
-            "ava_url": user.ava_url,
-            "date_joined": user.date_joined,
-            "email": user.email,
-            "phone_number": user.phone_number,
-        }
+        response = user.get_info()
 
     return jsonify(response), 200
 

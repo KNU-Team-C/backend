@@ -22,12 +22,12 @@ class UserReport(db.Model):
     def get_info(self):
         info = {
             'id': self.id,
-            'report_message': self.report_message,
+            'message': self.report_message,
             'plaintiff': self.plaintiff.get_info(),
-            'reported_user': self.reported_user.get_info(),
-            'date_created': self.date_created,
-            'is_resolved': self.is_resolved,
-            'date_resolved': self.date_resolved
+            'reportedUser': self.reported_user.get_info(),
+            'dateCreated': self.date_created,
+            'isResolved': self.is_resolved,
+            'dateResolved': self.date_resolved
         }
         return info
 
@@ -57,6 +57,20 @@ class User(db.Model):
     @staticmethod
     def _generate_password_hash(password_plaintext: str):
         return generate_password_hash(password_plaintext)
+
+    def get_info(self):
+        info = {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "is_blocked": self.is_blocked,
+            "is_staff": self.is_staff,
+            "ava_url": self.ava_url,
+            "date_joined": self.date_joined,
+            "email": self.email,
+            "phone_number": self.phone_number,
+        }
+        return info
 
 
 class Chat(db.Model):
@@ -228,12 +242,12 @@ class CompanyReport(db.Model):
     def get_info(self):
         info = {
             "id": self.id,
-            "report_message": self.report_message,
-            "user_id": self.user_id,
-            "company_id": self.company_id,
-            "date_created": self.date_created,
-            "is_resolved": self.is_resolved,
-            "date_resolved": self.date_resolved
+            "message": self.report_message,
+            "userId": self.user_id,
+            "companyId": self.company_id,
+            "dateCreated": self.date_created,
+            "isResolved": self.is_resolved,
+            "dateResolved": self.date_resolved
         }
         return info
 

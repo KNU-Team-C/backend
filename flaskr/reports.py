@@ -1,19 +1,21 @@
 from datetime import datetime
 
 from flask import Blueprint, request, jsonify
+
 from flaskr import db
 from flaskr.auth import token_required
 from flaskr.models import UserReport, CompanyReport
 
 bp = Blueprint('reports', __name__, '/')
 
-@bp.route('/user_report', methods=['POST'])
+
+@bp.route('/user-report', methods=['POST'])
 @token_required
 def create_user_report(current_user):
     data = request.get_json()
 
-    report_message = data.get('report_message')
-    reported_user_id = data.get('reported_user_id')
+    report_message = data.get('message')
+    reported_user_id = data.get('userId')
 
     if not all([report_message, reported_user_id]):
         return jsonify({"error": "Missing required fields"}), 400
@@ -28,15 +30,16 @@ def create_user_report(current_user):
     db.session.add(user_report)
     db.session.commit()
 
-    return jsonify({"success": "User report created"}), 201
+    return jsonify(user_report.get_info()), 201
 
-@bp.route('/company_report', methods=['POST'])
+
+@bp.route('/company-report', methods=['POST'])
 @token_required
 def create_company_report(current_user):
     data = request.get_json()
 
-    report_message = data['report_message']
-    company_id = data['company_id']
+    report_message = data['message']
+    company_id = data['companyId']
 
     print(report_message, company_id)
 
@@ -53,9 +56,10 @@ def create_company_report(current_user):
     db.session.add(company_report)
     db.session.commit()
 
-    return jsonify({"success": "Company report created"}), 201
+    return jsonify(company_report.get_info()), 201
 
-@bp.route('/user_report', methods=['GET'])
+
+@bp.route('/user-report', methods=['GET'])
 @token_required
 def get_user_reports(current_user):
     if not current_user.is_staff:
@@ -67,7 +71,8 @@ def get_user_reports(current_user):
 
     return jsonify(response), 200
 
-@bp.route('/user_report/<int:user_id>', methods=['GET'])
+
+@bp.route('/user-report/<int:user_id>', methods=['GET'])
 @token_required
 def get_user_report(current_user, user_id):
     if not current_user.is_staff:
@@ -82,7 +87,8 @@ def get_user_report(current_user, user_id):
 
     return jsonify(response), 200
 
-@bp.route('/company_report', methods=['GET'])
+
+@bp.route('/company-report', methods=['GET'])
 @token_required
 def get_company_reports(current_user):
     if not current_user.is_staff:
@@ -94,7 +100,8 @@ def get_company_reports(current_user):
 
     return jsonify(response), 200
 
-@bp.route('/company_report/<int:company_id>', methods=['GET'])
+
+@bp.route('/company-report/<int:company_id>', methods=['GET'])
 @token_required
 def get_company_report(current_user, company_id):
     if not current_user.is_staff:
@@ -109,7 +116,8 @@ def get_company_report(current_user, company_id):
 
     return jsonify(response), 200
 
-@bp.route('/user_report/resolve/<int:report_id>', methods=['POST'])
+
+@bp.route('/user-report/resolve/<int:report_id>', methods=['POST'])
 @token_required
 def resolve_user_report(current_user, report_id):
     if not current_user.is_staff:
@@ -127,7 +135,8 @@ def resolve_user_report(current_user, report_id):
 
     return jsonify({"success": "User report resolved"}), 200
 
-@bp.route('/company_report/resolve/<int:report_id>', methods=['POST'])
+
+@bp.route('/company-report/resolve/<int:report_id>', methods=['POST'])
 @token_required
 def resolve_company_report(current_user, report_id):
     if not current_user.is_staff:
