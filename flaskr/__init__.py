@@ -29,7 +29,7 @@ def create_app(test_config=None):
 
     # apply the blueprints to the app
     from flaskr import hello, auth, admin_users, admin_companies, admin_requests, \
-        companies, users, industries, technologies
+        companies, users, industries, technologies, projects, reports
 
     app.register_blueprint(hello.bp)
     app.register_blueprint(auth.bp)
@@ -40,6 +40,8 @@ def create_app(test_config=None):
     app.register_blueprint(users.bp)
     app.register_blueprint(industries.bp)
     app.register_blueprint(technologies.bp)
+    app.register_blueprint(projects.bp)
+    app.register_blueprint(reports.bp)
 
     return app
 

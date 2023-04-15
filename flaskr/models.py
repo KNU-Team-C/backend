@@ -1,3 +1,4 @@
+from sqlalchemy import Integer
 from werkzeug.security import generate_password_hash
 
 from flaskr.database import db
@@ -17,10 +18,24 @@ class UserReport(db.Model):
     plaintiff_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     reported_user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     date_created = db.Column(db.DateTime(timezone=True))
+    is_resolved = db.Column(db.Boolean, default=False)
+    date_resolved = db.Column(db.DateTime(timezone=True))
+
+    def get_info(self):
+        info = {
+            'id': self.id,
+            'message': self.report_message,
+            'plaintiff': self.plaintiff.get_info(),
+            'reportedUser': self.reported_user.get_info(),
+            'dateCreated': self.date_created,
+            'isResolved': self.is_resolved,
+            'dateResolved': self.date_resolved
+        }
+        return info
 
 
 class User(db.Model):
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.BigInteger().with_variant(db.Integer, "sqlite"), primary_key=True)
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     email = db.Column(db.String(100), unique=True)
@@ -86,6 +101,20 @@ class User(db.Model):
     def _generate_password_hash(password_plaintext: str):
         return generate_password_hash(password_plaintext)
 
+    def get_info(self):
+        info = {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "is_blocked": self.is_blocked,
+            "is_staff": self.is_staff,
+            "ava_url": self.ava_url,
+            "date_joined": self.date_joined,
+            "email": self.email,
+            "phone_number": self.phone_number,
+        }
+        return info
+
 
 class Chat(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
@@ -146,6 +175,7 @@ class Company(db.Model):
             "location": self.location,
             "description": self.description,
             "user": self.user_id,
+            "logo": self.logo_url,
             "is_blocked": self.is_blocked,
             "is_verified": self.is_verified,
             "date_created": self.date_created,
@@ -198,7 +228,7 @@ sets = db.Table('sets',
 
 
 class Project(db.Model):
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.BigInteger().with_variant(Integer, "sqlite"), primary_key=True)
     title = db.Column(db.String(100))
     url = db.Column(db.String(100))
     description = db.Column(db.Text)
@@ -211,6 +241,24 @@ class Project(db.Model):
     sets = db.relationship('Set', secondary=sets, lazy='subquery', backref=db.backref('project', lazy=True))
     attachments = db.relationship('Attachment', backref='project', lazy=True)
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+
+    def get_info(self):
+        query = db.session.query(Company)
+        company = query.filter(Company.id == self.company_id).first()
+
+        info = {
+            "id": self.id,
+            "title": self.title,
+            "url": self.url,
+            "description": self.description,
+            "logo_url": self.logo_url,
+            "is_public": self.is_public,
+            "company": company.get_info(),
+            "industries": [{"id": industry.id, "name": industry.name} for industry in self.industries],
+            "technologies": [{"id": technology.id, "name": technology.name} for technology in self.technologies],
+            "attachments": [{"id": attachment.id, "extension": attachment.extension} for attachment in self.attachments]
+        }
+        return info
 
 
 class Set(db.Model):
@@ -231,6 +279,20 @@ class CompanyReport(db.Model):
     user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     company_id = db.Column(db.BigInteger, db.ForeignKey('company.id'), nullable=False)
     date_created = db.Column(db.DateTime(timezone=True))
+    is_resolved = db.Column(db.Boolean, default=False)
+    date_resolved = db.Column(db.DateTime(timezone=True))
+
+    def get_info(self):
+        info = {
+            "id": self.id,
+            "message": self.report_message,
+            "userId": self.user_id,
+            "companyId": self.company_id,
+            "dateCreated": self.date_created,
+            "isResolved": self.is_resolved,
+            "dateResolved": self.date_resolved
+        }
+        return info
 
 
 class CompanyFeedback(db.Model):
