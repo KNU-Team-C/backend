@@ -16,6 +16,20 @@ class UserReport(db.Model):
     plaintiff_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     reported_user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     date_created = db.Column(db.DateTime(timezone=True))
+    is_resolved = db.Column(db.Boolean, default=False)
+    date_resolved = db.Column(db.DateTime(timezone=True))
+
+    def get_info(self):
+        info = {
+            'id': self.id,
+            'message': self.report_message,
+            'plaintiff': self.plaintiff.get_info(),
+            'reportedUser': self.reported_user.get_info(),
+            'dateCreated': self.date_created,
+            'isResolved': self.is_resolved,
+            'dateResolved': self.date_resolved
+        }
+        return info
 
 
 class User(db.Model):
@@ -43,6 +57,20 @@ class User(db.Model):
     @staticmethod
     def _generate_password_hash(password_plaintext: str):
         return generate_password_hash(password_plaintext)
+
+    def get_info(self):
+        info = {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "is_blocked": self.is_blocked,
+            "is_staff": self.is_staff,
+            "ava_url": self.ava_url,
+            "date_joined": self.date_joined,
+            "email": self.email,
+            "phone_number": self.phone_number,
+        }
+        return info
 
 
 class Chat(db.Model):
@@ -208,6 +236,20 @@ class CompanyReport(db.Model):
     user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     company_id = db.Column(db.BigInteger, db.ForeignKey('company.id'), nullable=False)
     date_created = db.Column(db.DateTime(timezone=True))
+    is_resolved = db.Column(db.Boolean, default=False)
+    date_resolved = db.Column(db.DateTime(timezone=True))
+
+    def get_info(self):
+        info = {
+            "id": self.id,
+            "message": self.report_message,
+            "userId": self.user_id,
+            "companyId": self.company_id,
+            "dateCreated": self.date_created,
+            "isResolved": self.is_resolved,
+            "dateResolved": self.date_resolved
+        }
+        return info
 
 
 class CompanyFeedback(db.Model):
