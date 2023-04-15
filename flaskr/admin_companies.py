@@ -102,10 +102,6 @@ def get_companies():
                 'id': technology.id,
                 'name': technology.name
             } for technology in flat_map(lambda project: project.technologies, company.projects)],
-            "reports": [{
-                'id': report.id,
-                'message': report.report_message,
-            } for report in company.companyReports]
         } for company in companies.items]
     }
 

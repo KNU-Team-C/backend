@@ -62,10 +62,8 @@ def get_users():
 
     def get_user_info(user):
         companies = [{'id': company.id, 'name': company.name} for company in user.companies]
-        reports = [{'id': report.id, 'message': report.report_message} for report in user.userReportsReported]
         user_info = user.get_info()
         user_info['companies'] = companies
-        user_info['reports'] = reports
         return user_info
 
     result = {
