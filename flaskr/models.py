@@ -3,6 +3,8 @@ from werkzeug.security import generate_password_hash
 
 from flaskr.database import db
 from flaskr.utils import flat_map
+from sqlalchemy.orm import validates
+import re
 
 chats = db.Table('chats',
                  db.Column('chat_id', db.BigInteger, db.ForeignKey('chat.id'), primary_key=True),
@@ -16,6 +18,20 @@ class UserReport(db.Model):
     plaintiff_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     reported_user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     date_created = db.Column(db.DateTime(timezone=True))
+    is_resolved = db.Column(db.Boolean, default=False)
+    date_resolved = db.Column(db.DateTime(timezone=True))
+
+    def get_info(self):
+        info = {
+            'id': self.id,
+            'message': self.report_message,
+            'plaintiff': self.plaintiff.get_info(),
+            'reportedUser': self.reported_user.get_info(),
+            'dateCreated': self.date_created,
+            'isResolved': self.is_resolved,
+            'dateResolved': self.date_resolved
+        }
+        return info
 
 
 class User(db.Model):
@@ -40,9 +56,69 @@ class User(db.Model):
     companyReports = db.relationship('CompanyReport', backref='user', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='user', lazy=True)
 
+    def __init__(self, first_name: str, last_name: str, email: str, password: str, phone_number: str):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.email = email
+        self.password = self._generate_password_hash(password)
+        self.temp_password = password
+        self.phone_number = phone_number
+
+    @validates("email")
+    def validate_email(self, key, value):
+        email_regex = re.compile('^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@'
+                                '((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-'
+                                'Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
+        if not email_regex.match(value):
+            raise ValueError("failed email validation")
+        return value
+
+    @validates("temp_password")
+    def validate_password(self, key, value):
+        print(value)
+        password_regex = re.compile('^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,300}$')
+        if not password_regex.match(value):
+            raise ValueError("failed password validation")
+        return value
+
+    @validates("first_name")
+    def validate_first_name(self, key, value):
+        first_name_regex = re.compile('^[a-zA-Z]+$')
+        if not first_name_regex.match(value):
+            raise ValueError("failed first name validation")
+        return value
+
+    @validates("last_name")
+    def validate_last_name(self, key, value):
+        last_name_regex = re.compile('^[a-zA-Z]+$')
+        if not last_name_regex.match(value):
+            raise ValueError("failed last name validation")
+        return value
+
+    @validates("phone_number")
+    def validate_phone_number(self, key, value):
+        phone_number_regex = re.compile('^\d{7,15}$')
+        if not phone_number_regex.match(value):
+            raise ValueError("failed phone number validation")
+        return value
+
     @staticmethod
     def _generate_password_hash(password_plaintext: str):
         return generate_password_hash(password_plaintext)
+
+    def get_info(self):
+        info = {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "is_blocked": self.is_blocked,
+            "is_staff": self.is_staff,
+            "ava_url": self.ava_url,
+            "date_joined": self.date_joined,
+            "email": self.email,
+            "phone_number": self.phone_number,
+        }
+        return info
 
 
 class Chat(db.Model):
@@ -96,6 +172,7 @@ class Company(db.Model):
     description = db.Column(db.Text)
     is_blocked = db.Column(db.Boolean, default=False)
     is_verified = db.Column(db.Boolean, default=False)
+    is_verification_request_pending = db.Column(db.Boolean, default=False)
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.now())
     projects = db.relationship('Project', backref='company', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='company', lazy=True)
@@ -228,6 +305,20 @@ class CompanyReport(db.Model):
     user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     company_id = db.Column(db.BigInteger, db.ForeignKey('company.id'), nullable=False)
     date_created = db.Column(db.DateTime(timezone=True))
+    is_resolved = db.Column(db.Boolean, default=False)
+    date_resolved = db.Column(db.DateTime(timezone=True))
+
+    def get_info(self):
+        info = {
+            "id": self.id,
+            "message": self.report_message,
+            "userId": self.user_id,
+            "companyId": self.company_id,
+            "dateCreated": self.date_created,
+            "isResolved": self.is_resolved,
+            "dateResolved": self.date_resolved
+        }
+        return info
 
 
 class CompanyFeedback(db.Model):

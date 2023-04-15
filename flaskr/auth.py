@@ -9,6 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from flaskr.database import db
 from flaskr.models import User
+import re
 
 bp = Blueprint("auth", __name__, url_prefix="/")
 
@@ -21,7 +22,7 @@ def token_required(f):
             token = request.headers['x-access-tokens']
 
         if not token:
-            return jsonify({'message': 'a valid token is missing'})
+            return jsonify({'message': 'a valid token is missing'}), 401
         try:
             data = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=["HS256"])
             current_user = User.query.filter_by(id=data['public_id']).first()
@@ -51,6 +52,7 @@ def login():
             "last_name": user.last_name,
             "email": user.email,
             "phone_number": user.phone_number,
+            "is_staff": user.is_staff,
             "token": token,
         }
         return jsonify(response)
@@ -67,8 +69,16 @@ def signup():
     email = data["email"]
     phone_number = data["phone_number"]
 
-    user = User(first_name=first_name, last_name=last_name, password=password, email=email,
-                phone_number=phone_number)
+    try:
+        user = User(first_name=first_name, last_name=last_name, password=password, email=email,
+                    phone_number=phone_number)
+    except ValueError as e:
+        return jsonify(
+            {
+                "error_msg": str(e),
+                "error_code": type(e).__name__
+            }
+        ), 400
     db.session.add(user)
     try:
         db.session.commit()
