@@ -9,6 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from flaskr.database import db
 from flaskr.models import User
+import re
 
 bp = Blueprint("auth", __name__, url_prefix="/")
 
@@ -67,8 +68,16 @@ def signup():
     email = data["email"]
     phone_number = data["phone_number"]
 
-    user = User(first_name=first_name, last_name=last_name, password=password, email=email,
-                phone_number=phone_number)
+    try:
+        user = User(first_name=first_name, last_name=last_name, password=password, email=email,
+                    phone_number=phone_number)
+    except ValueError as e:
+        return jsonify(
+            {
+                "error_msg": str(e),
+                "error_code": type(e).__name__
+            }
+        ), 400
     db.session.add(user)
     try:
         db.session.commit()
