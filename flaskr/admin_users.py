@@ -1,8 +1,8 @@
 from flask import request, jsonify, make_response, Blueprint
-
-from flaskr.models import User, UserReport
-from flaskr.database import db
 from sqlalchemy import text
+
+from flaskr.database import db
+from flaskr.models import User, UserReport
 
 bp = Blueprint("admin_users", __name__, url_prefix="/admin")
 
@@ -30,25 +30,22 @@ def get_users():
         query = query.filter(subquery)
 
     if search_query:
-        query = query.filter(text("first_name || ' ' || last_name LIKE :query").params(query='%'+search_query+'%'))
+        query = query.filter(text("first_name || ' ' || last_name LIKE :query").params(query='%' + search_query + '%'))
 
     users = query.paginate(page=page, per_page=page_size)
+
+    def get_user_info(user):
+        companies = [{'id': company.id, 'name': company.name} for company in user.companies]
+        user_info = user.get_info()
+        user_info['companies'] = companies
+        return user_info
 
     result = {
         'total_pages': users.pages,
         'total_items': users.total,
         'items_per_page': users.per_page,
         'current_page': users.page,
-        'users': [{
-            'id': user.id,
-            'ava_url': user.ava_url,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'companies': [{
-                'id': company.id,
-                'name': company.name
-            } for company in user.companies]
-        } for user in users.items]
+        'users': [get_user_info(user) for user in users.items]
     }
 
     return jsonify(result), 200
