@@ -10,19 +10,20 @@ bp = Blueprint("admin_users", __name__, url_prefix="/admin")
 
 @bp.route('/user_banned/<user_id>', methods=['PUT'])
 @token_required
-def change_user_by_id(current_user, user_id):
+def user_banned(current_user, user_id):
     user = User.query.get(user_id)
     if user is None:
         return make_response(f'User with id {user_id} does not exist', 400)
     else:
         data = request.get_json()
         user.is_blocked = bool(data["banned"])
+        db.session.query(UserReport).filter(UserReport.reported_user_id == user_id).delete()
         db.session.commit()
         response = {
             "id": user.id,
             "first_name": user.first_name,
             "last_name": user.last_name,
-            "is_blocked": user.is_blocked,
+            "is_blocked": bool(data["banned"]),
             "is_staff": user.is_staff,
             "ava_url": user.ava_url,
             "date_joined": user.date_joined,
