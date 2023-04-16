@@ -128,7 +128,7 @@ class Chat(db.Model):
     mini_ava_url = db.Column(db.String(2048))
     messages = db.relationship('Message', backref='chat', lazy=True)
 
-    def get_info(self, user_id):
+    def get_info(self):
         # chat_name  should be user2 name
 
         info = {

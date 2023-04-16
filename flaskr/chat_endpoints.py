@@ -21,7 +21,8 @@ def get_chats(current_user):
         response.append({
             'id': chat.id,
             'chat_name': chat_name,
-            'ava_url': ava_url
+            'ava_url': ava_url,
+            'last_message': chat.messages[-1].message if len(chat.messages) > 0 else None
         })
     return jsonify(response)
 
@@ -43,6 +44,7 @@ def get_messages(current_user, chat_id):
 def create_chat(current_user):
     data = request.get_json()
     chat = Chat()
+
 
     user_1 = User.query.filter_by(id=current_user.id).first()
     user_1.chats.append(chat)
