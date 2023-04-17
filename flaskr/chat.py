@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 
 from flask import jsonify
 from flask_socketio import send, join_room, leave_room
@@ -12,17 +13,23 @@ from flaskr.socketio import socketio
 
 def add_message_to_db(chat_id, data, user):
     chat = Chat.query.filter_by(id=chat_id).first()
+    time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     if not chat:
-        return 'Chat not found!'
+        raise Exception('Chat not found!')
     else:
         try:
             messages = chat.messages
-            messages.append(Message(message=data['message'], user_id=user.id))
+            messages.append(Message(message=data['message'], user_id=user.id, date=time))
             db.session.commit()
-        except:
-            return 'Error while adding message to db!'
+        except Exception as e:
+            raise Exception(f'Error while adding message to db: {e}')
 
-    return 'Message sent!'
+    return {
+        "message": data['message'],
+        "user_id": user.id,
+        "date": time,
+        "chat_id": chat_id
+    }
 
 
 def auth_user(f):
@@ -96,4 +103,6 @@ def handle_chat_message(user, data):
 
     result = add_message_to_db(data["chat-id"], data, user)
 
-    send(result, room=data["chat-id"], broadcast=True)
+    # send(result, room=data["chat-id"], broadcast=True)
+
+    socketio.emit('cmessage', result, room=data["chat-id"], broadcast=True)

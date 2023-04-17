@@ -136,6 +136,7 @@ class Chat(db.Model):
             'chat_name': self.chat_name,
             'ava_url': self.ava_url,
             'mini_ava_url': self.mini_ava_url,
+            'last_message': self.messages[-1].get_info() if self.messages else None
         }
         return info
 
