@@ -1,4 +1,5 @@
 from flask import jsonify, Blueprint, request, make_response
+from sqlalchemy import text
 
 from flaskr.auth import token_required
 from flaskr.database import db
@@ -119,12 +120,19 @@ def get_project(project_id):
 
 @bp.route('', methods=['GET'])
 def get_projects():
+    return get_all_projects(request), 200
+
+
+def get_all_projects(request, company_id=None):
     search_query = request.args.get('search_query', '', type=str)
     query = db.session.query(Project)
     query = filter_by_text(search_query, query, field='title')
 
     industries_ids = string_arg_to_ids_list(request.args.get('industries_ids', '', type=str))
     technologies_ids = string_arg_to_ids_list(request.args.get('technologies_ids', '', type=str))
+
+    if company_id is not None:
+        query = query.filter(text("company_id = :company_id").params(company_id=company_id))
 
     if len(industries_ids) > 0:
         query = query.filter(
@@ -139,8 +147,8 @@ def get_projects():
             )
         )
 
-    projects = query.all()
-    return jsonify([p.get_info() for p in projects]), 200
+    projects = query.order_by(Project.date_created.desc()).all()
+    return [p.get_info() for p in projects]
 
 
 @bp.route('/<project_id>', methods=['DELETE'])
