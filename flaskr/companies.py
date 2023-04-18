@@ -32,6 +32,9 @@ def create_company(user):
     return jsonify(response)
 
 
+
+
+
 @bp.route("/<company_id>", methods=["GET"])
 def company_info(company_id):
     company = Company.query.get(company_id)
@@ -63,21 +66,30 @@ def get_company_projects(company_id):
 
 
 @bp.route('/<company_id>', methods=['PUT'])
-def edit_company(company_id):
-    data = request.get_json()
+def edit_company(company_id):   
+    
     query = db.session.query(Company)
+    name = request.args.get('name', '', type=str)
+    email = request.args.get('email', '', type=str)
+    phone = request.args.get('phone_number', '', type=str)
+    loc = request.args.get('location', '', type=str)
+    desc = request.args.get('description', '', type=str)
+    logo_url = request.args.get('logo_url', '', type=str)
 
     company = query.filter(Company.id == company_id).first()
-    company.name = data['name']
-    company.email = data['email']
-    company.address = data['address']
-    company.phone_number = data['phoneNumber']
-    company.location = data['location']
-    company.description = data['description']
-
+    if company.name!=name and name is not None and name != '':
+        company.is_verified = False
+    company.name = name if name is not None and name != '' else company.name
+    company.email = email if email is not None and email !='' else company.email
+    company.phone_number = phone if phone is not None and phone!='' else company.phone_number
+    company.location = loc if loc is not None and loc !='' else company.location
+    company.description = desc if desc is not None and desc !='' else company.description
+    company.logo_url = logo_url if logo_url is not None and logo_url !='' else company.logo_url
     db.session.commit()
 
-    return jsonify(company.get_info())
+    
+
+    return jsonify(company.get_info()), 200
 
 
 @bp.route('/<company_id>/image', methods=['POST'])
