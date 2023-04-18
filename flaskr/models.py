@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash
 
 from flaskr.database import db
 from flaskr.utils import flat_map
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, backref
 import re
 
 chats = db.Table('chats',
@@ -51,7 +51,8 @@ class User(db.Model):
     messages = db.relationship('Message', backref='user', lazy=True)
     userReportsPlaintiff = db.relationship('UserReport', backref='plaintiff', lazy=True,
                                            foreign_keys=[UserReport.plaintiff_id])
-    userReportsReported = db.relationship('UserReport', backref='reported_user', lazy=True,
+    userReportsReported = db.relationship('UserReport', backref=backref('reported_user', cascade="all,delete"),
+                                          lazy=True,
                                           foreign_keys=[UserReport.reported_user_id])
     companyReports = db.relationship('CompanyReport', backref='user', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='user', lazy=True)
@@ -67,8 +68,8 @@ class User(db.Model):
     @validates("email")
     def validate_email(self, key, value):
         email_regex = re.compile('^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@'
-                                '((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-'
-                                'Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
+                                 '((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-'
+                                 'Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
         if not email_regex.match(value):
             raise ValueError("failed email validation")
         return value
@@ -173,7 +174,7 @@ class Company(db.Model):
     description = db.Column(db.Text)
     is_blocked = db.Column(db.Boolean, default=False)
     is_verified = db.Column(db.Boolean, default=False)
-    is_verification_request_pending = db.Column(db.Boolean, default=False)
+    is_verification_request_pending = db.Column(db.Boolean, default=True)
     date_created = db.Column(db.DateTime(timezone=True), default=db.func.now())
     projects = db.relationship('Project', backref='company', lazy=True)
     companyFeedbacks = db.relationship('CompanyFeedback', backref='company', lazy=True)

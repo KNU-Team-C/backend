@@ -69,7 +69,6 @@ def edit_company(company_id):
     company.phone_number = data['phoneNumber']
     company.location = data['location']
     company.description = data['description']
-    company.logo_url = data['logo']
 
     db.session.commit()
 

@@ -18,7 +18,7 @@ def verify_request_cancel(company_id):
 
     db.session.commit()
 
-    return 200
+    return jsonify({}), 200
 
 
 @bp.route('/company/<company_id>/verify', methods=['POST'])
@@ -30,7 +30,7 @@ def verify_company(company_id):
 
     db.session.commit()
 
-    return 200
+    return jsonify({}), 200
 
 
 @bp.route('/companies', methods=['GET'])
@@ -94,6 +94,7 @@ def get_companies():
             'ava_url': company.logo_url,
             'name': company.name,
             'description': company.description,
+            'is_verified': company.is_verified,
             'industries': [{
                 'id': industry.id,
                 'name': industry.name
