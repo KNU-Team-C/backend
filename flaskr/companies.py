@@ -3,10 +3,10 @@ from sqlalchemy import text
 
 from flaskr.auth import token_required
 from flaskr.database import db
-from flaskr.models import Company, Project, Industry, Technology
-from flaskr.utils import string_arg_to_ids_list, filter_by_text
 from flaskr.external_services import upload_image
-
+from flaskr.models import Company, Project, Industry, Technology
+from flaskr.projects import get_all_projects
+from flaskr.utils import string_arg_to_ids_list, filter_by_text
 
 bp = Blueprint("companies", __name__, url_prefix="/companies")
 
@@ -55,6 +55,11 @@ def get_company(company_id):
 
     result = company.get_info()
     return jsonify(result), 200
+
+
+@bp.route('/<company_id>/projects', methods=['GET'])
+def get_company_projects(company_id):
+    return get_all_projects(request, company_id), 200
 
 
 @bp.route('/<company_id>', methods=['PUT'])

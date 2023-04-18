@@ -262,6 +262,7 @@ class Project(db.Model):
     description = db.Column(db.Text)
     logo_url = db.Column(db.String(2048))
     is_public = db.Column(db.Boolean)
+    date_created = db.Column(db.DateTime(timezone=True))
     technologies = db.relationship('Technology', secondary=technologies, lazy='subquery',
                                    backref=db.backref('project', lazy=True))
     industries = db.relationship('Industry', secondary=industries, lazy='subquery',
@@ -282,6 +283,7 @@ class Project(db.Model):
             "logo_url": self.logo_url,
             "is_public": self.is_public,
             "company": company.get_info(),
+            "date_created": self.date_created,
             "industries": [{"id": industry.id, "name": industry.name} for industry in self.industries],
             "technologies": [{"id": technology.id, "name": technology.name} for technology in self.technologies],
             "attachments": [{"id": attachment.id, "extension": attachment.extension} for attachment in self.attachments]
