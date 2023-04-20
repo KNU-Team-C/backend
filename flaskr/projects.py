@@ -3,6 +3,7 @@ from sqlalchemy import text
 
 from flaskr.auth import token_required
 from flaskr.database import db
+from flaskr.external_services import upload_image
 from flaskr.models import Project, Technology, Industry, Attachment, Company
 from flaskr.utils import filter_by_text, string_arg_to_ids_list
 
@@ -115,7 +116,31 @@ def project_edit(current_user, project_id):
 @bp.route('/<project_id>', methods=['GET'])
 def get_project(project_id):
     project = Project.query.get(project_id)
-    return make_response(jsonify(project.get_info()), 401)
+    return make_response(jsonify(project.get_info()), 200)
+
+
+@bp.route('/<project_id>/image', methods=['POST'])
+@token_required
+def upload_project_image(current_user, project_id):
+    file = request.files['file']
+
+    query = db.session.query(Project)
+    project = query.filter(Project.id == project_id).first()
+
+    if not project:
+        return jsonify({'error': 'Project was not found'}), 404
+
+    if current_user.id != project.company.user_id:
+        return jsonify({'error': 'Insufficient permissions to perform action'}), 403
+
+    response = upload_image(file)
+    if response.status_code != 200:
+        return jsonify({'error': 'Could not upload image'})
+
+    project.logo_url = response.json()['image']['url']
+    db.session.commit()
+
+    return jsonify(project.get_info())
 
 
 @bp.route('', methods=['GET'])
