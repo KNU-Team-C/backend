@@ -65,7 +65,7 @@ def signup():
     data = request.form
     first_name = data["first_name"]
     last_name = data["last_name"]
-    password = generate_password_hash(data["password"])
+    password = data["password"]
     email = data["email"]
     phone_number = data["phone_number"]
 
